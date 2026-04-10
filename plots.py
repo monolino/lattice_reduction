@@ -87,3 +87,42 @@ if __name__ == "__main__" :
   #plot_eigenfunctions
   plot_Gf_f(4,1000,8)
   #plot_eigenfunction_m(8)
+
+  '''
+  def G_eval_div_f_numeric(t):
+    g = lambda t: 1-87/50*(t-a)+ 391/200*(t-a)**2 - 1687/1000*(t-a)**3
+    return G_eval(g, 4, 1000, t)/g(t)
+  plt = plot(
+    G_eval_div_f_numeric,
+    (0, 1),
+    plot_points=200,
+    axes_labels=[r"$t$", r"$G[f](t)/f(t)$"],
+    title=r"$M = 1000,\; s = 4$"
+  )
+  plt.save("G_plot.png")
+  print("Saved plot to G_plot.png")
+  '''
+    
+  '''
+  p1 = plot(
+    eigen_function,
+    (0, 1),
+    color='blue',
+    thickness=2,
+    legend_label=r"$f_{\mathrm{computed}}(x)$",
+    plot_points=300
+  )
+
+  p2 = plot(
+    their_eigfunc,
+    (0, 1),
+    color='red',
+    linestyle='--',
+    thickness=2,
+    legend_label=r"$f_{\mathrm{paper}}(x)$",
+    plot_points=300
+  )
+
+  plt_eig =  p1 + p2  
+  plt_eig.save('eigenfunc_plot.png')
+  '''
