@@ -7,7 +7,7 @@ Binomial: binomial(n,k)
 
 #variables
 m, s, t, x = var('m s t x')
-precision = 1000
+precision = 500
 CF = ComplexField(precision) #100 bits precision
 a = QQ(1)/2 #1/2 as element in Q
 
@@ -65,12 +65,31 @@ def G_div_f_numeric(f,s,M,t):
     return G_f/f
 
 def alpha_beta(f,s,M,m,left=0.0,right=1.0, N=2000):
+    
+    grid_points = [left + (right-left)*i/N for i in range(N+1)]
+    values = [(real_part(G_div_f_numeric(f,s,M,t)), t) for t in grid_points] #[(value,t), ...]
+    
+    alpha_1 = min(values, key=lambda x: x[0])
+    alpha_value = alpha_1[0]
+    alpha_t = alpha_1[1]
+    idx_alpha = grid_points.index(alpha_t)
+    t_alpha_left = grid_points[idx_alpha - 1] if idx_alpha > 0 else left
+    t_alpha_right = grid_points[idx_alpha + 1] if idx_alpha < len(grid_points) - 1 else right
+    refined_grid_points_alpha = [t_alpha_left + (t_alpha_right - t_alpha_left)*i/N for i in range(N+1)]
+    refined_values_alpha = [(real_part(G_div_f_numeric(f,s,M,t)), t) for t in refined_grid_points_alpha]
 
-    values= []
-    for i in range(N+1):
-        t = left + (right-left)*i/N #grid points on intervall
-        values.append(real_part(G_div_f_numeric(f,s,M,t)))
-    return min(values), max(values)
+    beta_1 = max(values, key=lambda x: x[0])
+    beta_value = beta_1[0]
+    beta_t = beta_1[1]
+    idx_beta = grid_points.index(beta_t)
+    t_beta_left = grid_points[idx_beta - 1] if idx_beta > 0 else left
+    t_beta_right = grid_points[idx_beta + 1] if idx_beta < len(grid_points) - 1 else right
+    refined_grid_points_beta = [t_beta_left + (t_beta_right - t_beta_left)*i/N for i in range(N+1)]
+    refined_values_beta = [(real_part(G_div_f_numeric(f,s,M,t)), t) for t in refined_grid_points_beta]
+
+
+    return min(refined_values_alpha, key=lambda x: x[0])[0], max(refined_values_beta, key=lambda x: x[0])[0]
+
 
 def lambda_estimate(s,M,m):
     '''
@@ -107,6 +126,9 @@ if __name__ == "__main__" :
     m=32
     p = p(m)
     alpha, beta = alpha_beta(p,4,1000,m)
-    print(alpha.n(100), " , ", beta.n(100))
+    print(alpha.n(53), " , ", beta.n(53))
     #print('lambda: ', lambda_estimate(4,1000,64))
     #print('alpha, beta = ', alpha_beta(4,1000,16))
+
+    #alpha = min(G_s(f,s), t)
+
