@@ -7,8 +7,8 @@ Binomial: binomial(n,k)
 
 #variables
 m, s, t, x = var('m s t x')
-precision = 500
-CF = ComplexField(precision) #100 bits precision
+precision = 500 #precision in bits
+CF = ComplexField(precision) 
 a = QQ(1)/2 #1/2 as element in Q
 
 
@@ -56,7 +56,8 @@ def matrix_T_m(m):
     return matrix(CF, m, m,lambda i, j: M_coeff(i, j))
 
 
-def G_div_f_numeric(f,s,M,t):
+def G_div_f_numeric(f,s,M,t,precision=precision):
+    CF = ComplexField(precision)
     t = CF(t)
     G_f = CF(0)
     for m in range(1, M + 1):
@@ -67,8 +68,12 @@ def G_div_f_numeric(f,s,M,t):
 def alpha_beta(f,s,M,m,left=0.0,right=1.0, N=2000):
     
     grid_points = [left + (right-left)*i/N for i in range(N+1)]
-    values = [real_part(G_div_f_numeric(f,s,M,t)) for t in grid_points] 
-
+    values = []
+    for i, t in enumerate(grid_points):
+        val = real_part(G_div_f_numeric(f,s,M,t))
+        values.append(val)
+        if i % 100 == 0:
+            print(f"Processed {i}/{N+1} points")
     return min(values), max(values)
 
 
@@ -104,9 +109,9 @@ def p(m):
 if __name__ == "__main__" :
     their_eigfunc = lambda t: 1-87/50*(t-a)+ 391/200*(t-a)**2 - 1687/1000*(t-a)**3
     
-    m=32
+    m=64
     p = p(m)
-    alpha, beta = alpha_beta(p,4,1000,m)
+    alpha, beta = alpha_beta(p,4,10000,m)
     print(alpha.n(53), " , ", beta.n(53))
     #print('lambda: ', lambda_estimate(4,1000,64))
     #print('alpha, beta = ', alpha_beta(4,1000,16))

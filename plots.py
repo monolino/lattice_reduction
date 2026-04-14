@@ -53,19 +53,34 @@ def plot_eigenfunctions():
   return
 
 def plot_Gf_f(s,M,m):
-  eig_function = lambda x: real_part(p(m)(x))
+  
+  eig_function = p(m)
+  
+  def plot_function(t):
+    val = G_div_f_numeric(eig_function,s,M,t)
+    print(f"Evaluating plot_function for t = {t}  => G[f](t)/f(t) = {val}")  # Debug print
+    return real_part(val)
+  
   def G_eval_div_f_numeric_m(t):
     return G_eval(eig_function, s, M, t)/eig_function(t)
   
   plt = plot(
-    G_eval_div_f_numeric_m,
+    plot_function,
     (0, 1),
     plot_points=200,
-    ymin=0.194,
-    ymax=0.225,
     axes_labels=[r"$t$", r"$G[f](t)/f(t)$"],
-    title=r"$M = 1000,\; s = 4$"
+    title=r"$G[f](t)/f(t)$ for m = " + str(m) + ", M = " + str(M) 
   )
+  plt2 = plot(
+    lambda t: 0.199458818343767,
+    (0, 1),
+    color='red',
+    linestyle='--',
+    thickness=2,
+    legend_label=r"$\lambda_m$",
+    plot_points=3
+  )
+  plt = plt + plt2
   plt.save(f"G_plot_own_m{m}.png")
   print("Saved plot")
 
@@ -85,8 +100,9 @@ def plot_eigenfunction_m(m):
 if __name__ == "__main__" :
   #plot_lambdas(4,1000)
   #plot_eigenfunctions
-  plot_Gf_f(4,1000,8)
-  #plot_eigenfunction_m(8)
+  m = 32
+  plot_Gf_f(4,10000,m)
+  #plot_eigenfunction_m(m)
 
   '''
   def G_eval_div_f_numeric(t):
@@ -97,7 +113,7 @@ if __name__ == "__main__" :
     (0, 1),
     plot_points=200,
     axes_labels=[r"$t$", r"$G[f](t)/f(t)$"],
-    title=r"$M = 1000,\; s = 4$"
+    title=r"$M = 1000, s = 4$"
   )
   plt.save("G_plot.png")
   print("Saved plot to G_plot.png")
@@ -109,7 +125,7 @@ if __name__ == "__main__" :
     (0, 1),
     color='blue',
     thickness=2,
-    legend_label=r"$f_{\mathrm{computed}}(x)$",
+    legend_label=r"$f_{computed}(x)$",
     plot_points=300
   )
 
@@ -119,7 +135,7 @@ if __name__ == "__main__" :
     color='red',
     linestyle='--',
     thickness=2,
-    legend_label=r"$f_{\mathrm{paper}}(x)$",
+    legend_label=r"$f_{paper}(x)$",
     plot_points=300
   )
 
