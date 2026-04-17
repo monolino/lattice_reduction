@@ -1,4 +1,5 @@
 from sage.all import *
+from pathlib import Path
 
 '''
 Hurwitz zeta function: hurwitz_zeta(s,w)
@@ -7,7 +8,7 @@ Binomial: binomial(n,k)
 
 #variables
 m, s, t, x = var('m s t x')
-precision = 500 #precision in bits
+precision = 600 #precision in bits
 CF = ComplexField(precision) 
 a = QQ(1)/2 #1/2 as element in Q
 
@@ -81,8 +82,8 @@ def lambda_estimate(s,M,m):
     '''
     with noticing that Gf/f has a plateau over [0.1,0.8] i.e is nearly constant there
     '''
-    p = p(m)
-    alpha,beta = alpha_beta(p,s,M,m,0.1,0.8)
+    p_m = p(m)
+    alpha,beta = alpha_beta(p_m,s,M,m,0.1,0.8)
     alpha = str(alpha)
     beta = str(beta)
     lambda_m = ""
@@ -90,7 +91,7 @@ def lambda_estimate(s,M,m):
         if x == y:
             prefix += x
         else:
-            break
+            break   
     return lambda_m.rstrip('.')
 
 def p(m):
@@ -98,6 +99,11 @@ def p(m):
     data = A.eigenvectors_right() #[eigval, [tuple], mult]
     dom = max(data, key=lambda data: abs(data[0])) #[dominanteigval, [dominant eigenvector], multiplicity]
     lambda_dom = dom[0]
+    #write lambda to file
+    base = Path(__file__).resolve().parent
+    path = base / f"lambda_{precision}"
+    path.write_text(str(real_part(lambda_dom)))
+    return real_part(lambda_dom)
     eigvec = dom[1][0]
     mult = dom[2]
     #print("lambda: ", lambda_dom, "\neigenvector: ", eigvec, "\nmult: ", mult)
@@ -109,12 +115,14 @@ def p(m):
 if __name__ == "__main__" :
     their_eigfunc = lambda t: 1-87/50*(t-a)+ 391/200*(t-a)**2 - 1687/1000*(t-a)**3
     
-    m=64
-    p = p(m)
-    alpha, beta = alpha_beta(p,4,10000,m)
-    print(alpha.n(53), " , ", beta.n(53))
+    m=128
+    #p = p(m)
+    #alpha, beta = alpha_beta(p,4,10000,m)
+    #print(alpha.n(53), " , ", beta.n(53))
     #print('lambda: ', lambda_estimate(4,1000,64))
     #print('alpha, beta = ', alpha_beta(4,1000,16))
 
     #alpha = min(G_s(f,s), t)
+
+    print(p(m))
 
