@@ -34,6 +34,7 @@ def trace_4_G_sq(M):
   #print(f"Trace of G squared: {val}")
   return val
 
+
 def get_lambda():
   base = Path(__file__).resolve().parent
   path = base.parent / "DominantEigenvalue" / f"lambda_{precision}"
