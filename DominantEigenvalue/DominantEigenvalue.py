@@ -87,9 +87,9 @@ def lambda_estimate(s,M,m):
     alpha = str(alpha)
     beta = str(beta)
     lambda_m = ""
-    for x, y in zip(a, b):
+    for x, y in zip(alpha, beta):
         if x == y:
-            prefix += x
+            lambda_m += x
         else:
             break   
     return lambda_m.rstrip('.')
@@ -103,8 +103,12 @@ def p(m):
     base = Path(__file__).resolve().parent
     path = base / f"lambda_{precision}"
     path.write_text(str(real_part(lambda_dom)))
-    return real_part(lambda_dom)
+    #return real_part(lambda_dom)
+    
     eigvec = dom[1][0]
+    #normalize the eigenvector such that f(0) = 1
+    #eigvec = eigvec / eigvec[0]
+
     mult = dom[2]
     #print("lambda: ", lambda_dom, "\neigenvector: ", eigvec, "\nmult: ", mult)
     def eig_function(x):
@@ -115,14 +119,14 @@ def p(m):
 if __name__ == "__main__" :
     their_eigfunc = lambda t: 1-87/50*(t-a)+ 391/200*(t-a)**2 - 1687/1000*(t-a)**3
     
-    m=128
+    m=64
     #p = p(m)
     #alpha, beta = alpha_beta(p,4,10000,m)
     #print(alpha.n(53), " , ", beta.n(53))
-    #print('lambda: ', lambda_estimate(4,1000,64))
+    print('lambda: ', lambda_estimate(4,1000,m))
     #print('alpha, beta = ', alpha_beta(4,1000,16))
 
     #alpha = min(G_s(f,s), t)
 
-    print(p(m))
+    #print(p(m))
 
