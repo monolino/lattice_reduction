@@ -32,9 +32,13 @@ def constant_c(m):
   lambda_dom_r, ev_right, mult_r = max(data_right, key=lambda data: abs(data[0])) #right eigenvector corresponding to the dominant eigenvalue
   lambda_dom_l, ev_left, mult_l = max(data_left, key=lambda data: abs(data[0])) #left eigenvector corresponding to the dominant eigenvalue
   
-  #normalize the eigenvectors
   ev_right = ev_right[0]
   ev_left = ev_left[0]
+
+  #scale right eigenvector such that f(0) = 1 TODO: do this normalization also for dominant eigenvector.
+  ev_right = ev_right / ev_right[0]
+
+  #normalize the eigenvectors
   norm = ev_left.dot_product(ev_right)
   ev_left = ev_left / norm
 
@@ -42,7 +46,7 @@ def constant_c(m):
   return real_part(ev_left.dot_product(coeff_vector_u(m)))
 
 if __name__ == "__main__":
-  m = 64
+  m = 16
   c = constant_c(m)
   print(f"Constant c for m={m}: {c}")
   
