@@ -41,12 +41,12 @@ def find_k_for_eps(epsilon, m=64, M=1000):
 if __name__ == "__main__":
   #print(f"w_1: {w_1().n(precision)}")
   #print(f"w_2: {w_2().n(precision)}")
-  k = 2
+  k = 3
   M=1000
-  #w_k_val = w_k(k, m=8, M=M)
-  #print(f"w_{k}: {w_k_val.n(precision)}")
+  w_k_val = w_k(k, m=8, M=M)
+  print(f"w_{k}: {w_k_val.n(precision)}")
   #print(f"paper w_{k}: {w_2_val}")
 
   epsilon = 0.0001
-  k = find_k_for(epsilon, m=64, M=1000)
-  print(f"Smallest k such that w_k < {epsilon}: {k}")
+  #k = find_k_for(epsilon, m=64, M=1000)
+  #print(f"Smallest k such that w_k < {epsilon}: {k}")
