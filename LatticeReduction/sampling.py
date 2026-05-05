@@ -1,12 +1,14 @@
 from sage.all import *
-import random
+import random as pyrandom #Sage also has a random
+from Algorithm import *
+import matplotlib.pyplot as plt
 
 #how to hash into class groups Construction 2 p.11 of https://eprint.iacr.org/2024/034.pdf
 
 
 #------------Prime generation----------------#
 #code from here https://github.com/seresistvanandras/hashingToClassGroups/blob/main/ClassGroupPlayground%2025.ipynb
-def random_prime(n):
+def random_prime_length(n):
     prime_candidate = 2
     while True:
             prime_candidate = getLowLevelPrime(n)
@@ -28,7 +30,7 @@ first_primes_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
                      307, 311, 313, 317, 331, 337, 347, 349]
 
 def nBitRandom(n):
-  return random.randrange(2**(n-1)+1, 2**n - 1)
+  return pyrandom.randrange(2**(n-1)+1, 2**n - 1)
 
 def getLowLevelPrime(n):
     '''Generate a prime candidate divisible 
@@ -65,10 +67,20 @@ def isMillerRabinPassed(mrc):
     # Set number of trials here
     numberOfRabinTrials = 30
     for i in range(numberOfRabinTrials):
-        round_tester = random.randrange(2, mrc)
+        round_tester = pyrandom.randrange(2, mrc)
         if trialComposite(round_tester):
             return False
     return True
+
+def bit_length_n(D):
+  '''input discriminant D approx 2^n, output n/2 -1'''
+  n = abs(D).bit_length() # D approx 2^n
+  k = (n // 2) - 1
+  return k
+
+def sage_random_prime(n):
+  p = random_prime(2**n - 1, lbound=2**(n-1)+1)
+  return p
 
 #------------Sampling class group----------------#
 '''what is the discriminant D?'''
@@ -84,13 +96,15 @@ d5 = 3 * 3 * 7 * 2 ** 4084 - 1
 
 
 #Wesolowski’s hash-to-class group construction (not hash but random sampling)
-def random_class_group_element(D, n):
+def random_class_group_element(D):
+  assert D % 4 == 1 or D % 4 == 0, "D should be congruent to 1 mod 4 or 0 mod 4"
+  n = bit_length_n(D) 
   #rejection sampling
   while True:
-    p = random_prime(n)
+    p = sage_random_prime(n)
     if legendre_symbol(D, p) == 1: #p splits in Q(sqrt{D})
       D_mod_p = D % p
-      b = modular_sqrt(D_mod_p, p)
+      b = modular_sqrt(D_mod_p, p) #solutions b, p - b in mod p
 
       #valid binary quadratic form with disciminant D, (p,b,c)
       numerator = b*b - D
@@ -103,7 +117,7 @@ def random_class_group_element(D, n):
       break
 
   #not hashing (s = p mod 3), but randomly choosing
-  sign = randint(0,1) 
+  sign = pyrandom.randint(0,1)
   if sign:
     return  (p, b)
   return  (p, -b)
@@ -134,7 +148,7 @@ def modular_sqrt(a, p):
       generalized Riemann hypothesis is false).
   """
   if legendre_symbol(a, p) != 1:
-        return 0
+    return 0
   elif a == 0:
     return 0
   elif p == 2:
@@ -179,15 +193,93 @@ def modular_sqrt(a, p):
 #NOTE: working over basis (1,sqrt{D}) not (1,i)
 def class_group_element_to_vector_in_QQ(element):
   p, b = element
-  v = (QQ(p), 0)
+  v = (QQ(p), QQ(0))
   u = (-QQ(b)/2, QQ(1)/2)
+  assert all(isinstance(x, (int, Integer, Rational)) for x in v + u), "v and u should lie in QQ^2"
   return v, u
+
+#----------------Histogram----------------#
+def histogram_of_lattice_reduction(D, num_samples):
+  histogram = {}
+
+  not_minimal = 0
+
+  for _ in range(num_samples):
+    class_group_element = random_class_group_element(D)
+    #print(f" p, b = {class_group_element}")
+    v, u = class_group_element_to_vector_in_QQ(class_group_element)
+
+    
+    try:
+      test_minimal_basis(v, u, D)
+      is_minimal = True
+    except AssertionError:
+      is_minimal = False
+      not_minimal += 1
+
+
+    (vm, um), L = lattice_reduction_2dim(v, u, D)
+    print(L)
+    if L not in histogram:
+      histogram[L] = 1
+    histogram[L] += 1
+
   
+  # Sort by L
+  L_values = sorted(histogram.keys())
+  counts = [histogram[L] for L in L_values]
+
+  plt.figure()
+  plt.bar(L_values, counts)
+
+  plt.xlabel("Number of reduction steps L")
+  plt.ylabel("Frequency")
+  
+
+  if -D == 3 * 11 * 2 ** 503 - 1:
+    d_str = "d1"
+  elif -D == 3 * 5 * 2 ** 1004 - 1:
+    d_str = "d2"
+  elif -D == 3 * 3 * 2 ** 1551 - 1:
+    d_str = "d3"
+  elif -D == 3 * 17 * 2 ** 2026 - 1:
+    d_str = "d4"
+  elif -D == 3 * 3 * 7 * 2 ** 4084 - 1:
+    d_str = "d5"
+  else:  d_str = f"D={D}"
+  plt.title(
+    f"Histogram of lattice reduction steps\n"
+    f"Discriminant D = {d_str}, samples = {num_samples}"
+  )
+
+  plt.savefig(f"histogram_{d_str}_samples_{num_samples}.png")
+
+  print(f"Not minimal basis count: {not_minimal} out of {num_samples}")
+  return histogram
+
   
 if __name__ == "__main__":
-  D = -2545453607 #cool discriminant (?)
-  n = 16 #depend on discriminant see paper hashing
-  class_group_element = random_class_group_element(D,n)
-  print(f"Random class group element: {class_group_element}")
-  v, u = class_group_element_to_vector_in_QQ(class_group_element)
-  print(f"Corresponding vector in QQ^2: v={v}, u={u}")
+  d1 = 3 * 11 * 2 ** 503 - 1
+  d2 = 3 * 5 * 2 ** 1004 - 1
+  d3 = 3 * 3 * 2 ** 1551 - 1
+  d4 = 3 * 17 * 2 ** 2026 - 1
+  d5 = 3 * 3 * 7 * 2 ** 4084 - 1
+
+  #NOTE: the discriminant D is -d, so -d1, -d2, -d3, -d4, -d5
+  if False:
+    class_group_element = random_class_group_element(-d1)
+    print(f"Random class group element: {class_group_element}")
+    v, u = class_group_element_to_vector_in_QQ(class_group_element)
+    print(f"Corresponding vector in QQ^2: v={v}, u={u}")
+
+  histogram = histogram_of_lattice_reduction(-d2, 1000)
+
+  if False:
+    p,b = class_group_element
+    q = - (p * b // 2)
+    print(f"q = {q}")
+
+
+ 
+  
+
