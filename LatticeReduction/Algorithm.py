@@ -18,7 +18,7 @@ def inner_product(v, u, d):
   return v[0] * u[0] + abs(d) * v[1] * u[1]
 
 def norm(u, d):
-  return inner_product(u, u, d)  #i.e. u1^2 + |d| u2^2
+  return inner_product(u, u, d)  #i.e. u1^2 + |d| u2^2 NOTE: squared norm
 
 def lattice_reduction_2dim(v, u, d):
   assert all(isinstance(x, (int, Integer, Rational)) for x in v + u), "v and u should lie in QQ^2"

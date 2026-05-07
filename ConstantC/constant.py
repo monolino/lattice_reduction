@@ -22,9 +22,6 @@ def coeff_vector_u(m):
     coeffs.append(CF(ck))
   return vector(CF, coeffs)
 
-
-
-
 def constant_c(m):
   A = matrix_T_m(m)
   data_left = A.eigenvectors_left()
