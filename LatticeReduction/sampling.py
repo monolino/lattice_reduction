@@ -199,14 +199,19 @@ def class_group_element_to_vector_in_QQ(element):
   return v, u
 
 #----------------Histogram----------------#
-def histogram_of_lattice_reduction(D, num_samples):
+def histogram_of_lattice_reduction(D, num_samples, log=False):
   histogram = {}
 
   not_minimal = 0
 
   for _ in range(num_samples):
     class_group_element = random_class_group_element(D)
-    #print(f" p, b = {class_group_element}")
+    
+    if log:
+      cglog = f"classgroupelementslog.txt"
+      with open(cglog, "a") as f:
+        f.write(f"p = {class_group_element[0]}, b = {class_group_element[1]}\n")
+
     v, u = class_group_element_to_vector_in_QQ(class_group_element)
 
     
@@ -224,10 +229,18 @@ def histogram_of_lattice_reduction(D, num_samples):
       histogram[L] = 1
     histogram[L] += 1
 
-  
   # Sort by L
   L_values = sorted(histogram.keys())
   counts = [histogram[L] for L in L_values]
+
+  #log
+  if log:
+    histogram_file = f"histogram.txt"
+    with open(histogram_file, "w") as f:
+      for L in L_values:
+        f.write(f"L = {L}: {histogram[L]}\n")
+
+  
 
   plt.figure()
   plt.bar(L_values, counts)
@@ -272,7 +285,7 @@ if __name__ == "__main__":
     v, u = class_group_element_to_vector_in_QQ(class_group_element)
     print(f"Corresponding vector in QQ^2: v={v}, u={u}")
 
-  histogram = histogram_of_lattice_reduction(-d2, 1000)
+  histogram = histogram_of_lattice_reduction(-d1, 1000, log=True)
 
   if False:
     p,b = class_group_element
