@@ -1,6 +1,6 @@
 from sage.all import *
 import random as pyrandom #Sage also has a random
-from Algorithm import *
+from L_rdc_Algorithm import *
 import matplotlib.pyplot as plt
 
 #how to hash into class groups Construction 2 p.11 of https://eprint.iacr.org/2024/034.pdf
@@ -200,6 +200,18 @@ def class_group_element_to_vector_in_QQ(element):
 
 #----------------Histogram----------------#
 def histogram_of_lattice_reduction(D, num_samples, log=False):
+  if -D == 3 * 11 * 2 ** 503 - 1:
+    d_str = "d1"
+  elif -D == 3 * 5 * 2 ** 1004 - 1:
+    d_str = "d2"
+  elif -D == 3 * 3 * 2 ** 1551 - 1:
+    d_str = "d3"
+  elif -D == 3 * 17 * 2 ** 2026 - 1:
+    d_str = "d4"
+  elif -D == 3 * 3 * 7 * 2 ** 4084 - 1:
+    d_str = "d5"
+  else:  d_str = f"D={D}"
+
   histogram = {}
 
   not_minimal = 0
@@ -208,7 +220,7 @@ def histogram_of_lattice_reduction(D, num_samples, log=False):
     class_group_element = random_class_group_element(D)
     
     if log:
-      cglog = f"classgroupelementslog.txt"
+      cglog = f"classgroupelementslog_{d_str}_{num_samples}.txt"
       with open(cglog, "a") as f:
         f.write(f"p = {class_group_element[0]}, b = {class_group_element[1]}\n")
 
@@ -235,7 +247,7 @@ def histogram_of_lattice_reduction(D, num_samples, log=False):
 
   #log
   if log:
-    histogram_file = f"histogram.txt"
+    histogram_file = f"histogram_{d_str}_{num_samples}.txt"
     with open(histogram_file, "w") as f:
       for L in L_values:
         f.write(f"L = {L}: {histogram[L]}\n")
@@ -249,17 +261,6 @@ def histogram_of_lattice_reduction(D, num_samples, log=False):
   plt.ylabel("Frequency")
   
 
-  if -D == 3 * 11 * 2 ** 503 - 1:
-    d_str = "d1"
-  elif -D == 3 * 5 * 2 ** 1004 - 1:
-    d_str = "d2"
-  elif -D == 3 * 3 * 2 ** 1551 - 1:
-    d_str = "d3"
-  elif -D == 3 * 17 * 2 ** 2026 - 1:
-    d_str = "d4"
-  elif -D == 3 * 3 * 7 * 2 ** 4084 - 1:
-    d_str = "d5"
-  else:  d_str = f"D={D}"
   plt.title(
     f"Histogram of lattice reduction steps\n"
     f"Discriminant D = {d_str}, samples = {num_samples}"
@@ -285,7 +286,7 @@ if __name__ == "__main__":
     v, u = class_group_element_to_vector_in_QQ(class_group_element)
     print(f"Corresponding vector in QQ^2: v={v}, u={u}")
 
-  histogram = histogram_of_lattice_reduction(-d1, 1000, log=True)
+  histogram = histogram_of_lattice_reduction(-d3, 500, log=True)
 
   if False:
     p,b = class_group_element

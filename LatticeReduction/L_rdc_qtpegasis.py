@@ -1,5 +1,8 @@
 from sage.all import *
 
+def nearest_integer(q):
+  return (q + QQ(1)/2).floor()
+
 '''
 Class group Q(sqrt{d}) for d squarefree
 element v of the class group is: v = v1 + i sqrt{d} v2
@@ -11,8 +14,6 @@ G = [
   1, 0
   0, d]
 '''
-def nearest_integer(q):
-  return (q + QQ(1)/2).floor()
 
 def inner_product(v, u, d):
   return v[0] * u[0] + abs(d) * v[1] * u[1]
@@ -20,6 +21,7 @@ def inner_product(v, u, d):
 def norm(u, d):
   return inner_product(u, u, d)  #i.e. u1^2 + |d| u2^2 NOTE: squared norm
 
+#NOTE: Important!! the norm is the squared norm here.
 def lattice_reduction_2dim(v, u, d):
   assert all(isinstance(x, (int, Integer, Rational)) for x in v + u), "v and u should lie in QQ^2"
 
@@ -50,5 +52,3 @@ if __name__ == "__main__":
   v = (QQ(3),QQ(1))
   (vm,um), L = lattice_reduction_2dim(u,v,d)
   print(f"Reduced basis: {vm}, {um}, L={L}")
-
-
