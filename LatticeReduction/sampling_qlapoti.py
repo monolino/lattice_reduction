@@ -1,6 +1,7 @@
 from sage.all import *
 from L_rdc_algorithm import *
 from quaternion import QuaternionAlgebra
+from euclideanspace import EuclideanSpace
 import random
 
 p = 5 #TODO what is p in our quaternion algebra B(-1,p)?
@@ -28,7 +29,13 @@ def histogram(n, QA=B, trials=1000):
 if __name__ == "__main__":
   n = 1001
   u,v = lattice_vectors(n, B)
+  E = EuclideanSpace(2)
   print(f"u: {u}, v: {v}")
+  try:
+    test_minimal_basis(E, v, u)
+    print("The basis is minimal")
+  except AssertionError:
+    print("The basis is not minimal")
 
   
 

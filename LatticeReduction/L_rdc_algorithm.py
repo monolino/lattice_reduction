@@ -28,7 +28,7 @@ def lattice_reduction_2dim(Obj, v, u):
   test_minimal_basis(u,v)
   return (u,v), L
 
-def test_minimal_basis(v, u):
+def test_minimal_basis(Obj,v, u):
   assert all(isinstance(x, (int, Integer, Rational)) for x in v + u), "v and u should lie in QQ^2"
   assert (Obj.norm(v) <= Obj.norm(u) and abs(Obj.inner_product(v,u)) <= Obj.norm(v)/2) or (Obj.norm(u) <= Obj.norm(v) and abs(Obj.inner_product(u,v)) <= Obj.norm(u)/2 ), f"The basis ({v}, {u}) is not reduced"
 

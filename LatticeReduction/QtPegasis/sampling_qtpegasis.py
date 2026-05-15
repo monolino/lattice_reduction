@@ -1,6 +1,6 @@
 from sage.all import *
 import random as pyrandom #Sage also has a random
-from L_rdc_Algorithm import *
+from L_rdc_qtpegasis import *
 import matplotlib.pyplot as plt
 
 #how to hash into class groups Construction 2 p.11 of https://eprint.iacr.org/2024/034.pdf
