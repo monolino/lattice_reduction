@@ -25,7 +25,7 @@ def lattice_reduction_2dim(Obj, v, u):
     r = (u[0] - q * v[0], u[1] - q * v[1])   #u - q * v  faster than using vector(QQ) operations
     u, v = v, r
     L += 1
-  test_minimal_basis(u,v)
+  test_minimal_basis(Obj,u,v)
   return (u,v), L
 
 def test_minimal_basis(Obj,v, u):
