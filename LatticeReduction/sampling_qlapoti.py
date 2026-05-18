@@ -23,7 +23,8 @@ def small_generator(n, QA):
 def lattice_vectors(n, QA):
   coeffs = small_generator(n, QA)
   u = (QQ(n), 0) #n is gcd so integer
-  v = (QQ(-2*coeffs[1]), QQ(2* coeffs[0])) # coeffs are all integer
+  x = inverse_mod(2*coeffs[0],n)*2*coeffs[1] 
+  v = (QQ(n-x), QQ(1)) # coeffs are all integer
   return u,v
 
 def histogram(n, QA, num_samples=1000, log=False):
@@ -107,16 +108,31 @@ def plot_z_in_disk(n, QA, num_samples=1000):
     p_str_title = "27 * 2^500 - 1"
     p_str = "p3"
   
+  minimal_count = 0
   points = []
   for _ in range(num_samples):
     v, u = lattice_vectors(n, QA)
+    try :
+      test_minimal_basis(E,v,u)
+      minimal_count += 1
+    except AssertionError:
+      pass
+    
 
     if E.norm(v) > E.norm(u):
       v, u = u, v 
     #z = v/u
     z = ((v[0]*u[0]+v[1]*u[1])/(u[0]**2+u[1]**2), (v[1]*u[0]-v[0]*u[1])/(u[0]**2+u[1]**2))
     points.append(z)
+    
+  z_re, z_im = z
+  lhs = z_re**2 + z_im**2
+  rhs = (E.norm(v)**2) / (E.norm(u)**2)
+
+  print(lhs, rhs)
+
   
+  print(f"Minimal basis count: {minimal_count} out of {num_samples}")
   xs, ys = zip(*points)
 
   plt.figure(figsize=(6,6))
@@ -133,7 +149,7 @@ def plot_z_in_disk(n, QA, num_samples=1000):
   plt.colorbar(label="Log density")
 
   # plot the points
-  plt.scatter(xs, ys, s=1, alpha=0.2, color='black')
+  plt.scatter(xs, ys, s=3, alpha=0.2, color='black')
   
 
   # draw the unit circle
@@ -170,9 +186,8 @@ if __name__ == "__main__":
   p1 = 5 * 2**248 - 1
   p2 = 65 * 2**376 - 1
   p3 = 27 * 2**500 - 1
-  e = 246
   B = QuaternionAlgebra(p1)
-  n = random.randint(1, 2**e)
+  n = 26461114711533867143062139049070924993
   u,v = lattice_vectors(n, B)
   E = EuclideanSpace(2)
   print(f"u: {u}, v: {v}")
