@@ -5,11 +5,16 @@ from euclideanspace import EuclideanSpace
 import random
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import gaussian_kde #density plot
+from matplotlib.colors import LogNorm
+import matplotlib.cm as cm
 
 def small_generator(n, QA):
   '''I is left ideal, n is the integer n=nrd(I) and b is the basis of I
   returns alpha
   '''
+  if n % 2 == 0:
+    raise ValueError("n must be odd")
   while True:
     coeffs = [random.randint(1, 10**5) for _ in range(4)]
     if gcd(2*coeffs[0], n) == 1 and gcd(QA.nrd(coeffs), n**2) == 1:
@@ -115,11 +120,21 @@ def plot_z_in_disk(n, QA, num_samples=1000):
   xs, ys = zip(*points)
 
   plt.figure(figsize=(6,6))
-
   
-  # plot the points
-  plt.scatter(xs, ys, s=5, alpha=0.6)
+  # density color map
+  cmap = cm.get_cmap('inferno').copy()
+  cmap.set_under('white')  # 0 is white
 
+  plt.hist2d(xs, ys,
+    bins=200,
+    density=True,
+    cmap=cmap,
+    norm=LogNorm(vmin=1))
+  plt.colorbar(label="Log density")
+
+  # plot the points
+  plt.scatter(xs, ys, s=1, alpha=0.2, color='black')
+  
 
   # draw the unit circle
   theta = np.linspace(0, 2*np.pi, 300)
@@ -130,7 +145,12 @@ def plot_z_in_disk(n, QA, num_samples=1000):
   
   plt.axhline(0)
   plt.axvline(0)
-  plt.gca().set_aspect('equal', adjustable='box')
+  
+  plt.xlim(-1, 1)
+  plt.ylim(-1, 1)
+
+  #plt.gca().set_aspect('equal', adjustable='box')
+  plt.gca().set_aspect('equal')
 
 
   plt.title(
@@ -150,8 +170,9 @@ if __name__ == "__main__":
   p1 = 5 * 2**248 - 1
   p2 = 65 * 2**376 - 1
   p3 = 27 * 2**500 - 1
+  e = 246
   B = QuaternionAlgebra(p1)
-  n = 1001
+  n = random.randint(1, 2**e)
   u,v = lattice_vectors(n, B)
   E = EuclideanSpace(2)
   print(f"u: {u}, v: {v}")
