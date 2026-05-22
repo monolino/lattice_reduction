@@ -95,7 +95,7 @@ def histogram(n, QA, num_samples=1000, log=False):
   return histogram
 
 
-def plot_z_in_disk(n, QA, num_samples=1000):
+def plot_z_in_disk(n, QA, num_samples=1000, log=False):
   E = EuclideanSpace(2)
   p = QA.p
   if p == 5 * 2**248 - 1:
@@ -148,8 +148,14 @@ def plot_z_in_disk(n, QA, num_samples=1000):
     norm=LogNorm(vmin=1))
   plt.colorbar(label="Log density")
 
+  #log points
+  if log:
+    with open(f"points_{p_str}_samples_{num_samples}.txt", "w") as f:
+      for z in points:
+        f.write(f"({float(z[0])}, {float(z[1])})\n")
+
   # plot the points
-  plt.scatter(xs, ys, s=3, alpha=0.2, color='black')
+  plt.scatter(xs, ys, s=3, alpha=1, color='black')
   
 
   # draw the unit circle
@@ -159,8 +165,8 @@ def plot_z_in_disk(n, QA, num_samples=1000):
 
   plt.plot(circle_x, circle_y, 'r', label='|z| = 1')
   
-  plt.axhline(0)
-  plt.axvline(0)
+  #plt.axhline(0)
+  #plt.axvline(0)
   
   plt.xlim(-1, 1)
   plt.ylim(-1, 1)
@@ -194,7 +200,7 @@ if __name__ == "__main__":
 
   #histo = histogram(n, B, num_samples=10000)
   #print(histo)
-  plot_z_in_disk(n, B, num_samples=10000)
+  plot_z_in_disk(n, B, num_samples=10000, log=False)
   
 
   
