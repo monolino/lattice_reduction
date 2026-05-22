@@ -27,7 +27,6 @@ def lattice_reduction_2dim(v, u, d):
 
   #Assumption that ||v|| <= ||u||
   if norm(v,d) > norm(u,d):
-    print('Case B: swap')
     v, u = u, v 
 
   #iteration count L
