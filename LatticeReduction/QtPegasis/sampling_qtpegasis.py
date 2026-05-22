@@ -2,6 +2,7 @@ from sage.all import *
 import random as pyrandom #Sage also has a random
 from L_rdc_qtpegasis import *
 import matplotlib.pyplot as plt
+import numpy as np
 
 #how to hash into class groups Construction 2 p.11 of https://eprint.iacr.org/2024/034.pdf
 
@@ -79,7 +80,7 @@ def bit_length_n(D):
   return k
 
 def sage_random_prime(n):
-  p = random_prime(2**n - 1, lbound=2**(n-1)+1)
+  p = random_prime(2**n - 1) # lbound=2**(n-1)+1
   return p
 
 #------------Sampling class group----------------#
@@ -98,7 +99,7 @@ d5 = 3 * 3 * 7 * 2 ** 4084 - 1
 #Wesolowski’s hash-to-class group construction (not hash but random sampling)
 def random_class_group_element(D):
   assert D % 4 == 1 or D % 4 == 0, "D should be congruent to 1 mod 4 or 0 mod 4"
-  n = bit_length_n(D) 
+  n = (bit_length_n(D)) * 10
   #rejection sampling
   while True:
     p = sage_random_prime(n)
@@ -236,7 +237,6 @@ def histogram_of_lattice_reduction(D, num_samples, log=False):
 
 
     (vm, um), L = lattice_reduction_2dim(v, u, D)
-    print(L)
     if L not in histogram:
       histogram[L] = 1
     histogram[L] += 1
@@ -271,6 +271,73 @@ def histogram_of_lattice_reduction(D, num_samples, log=False):
   print(f"Not minimal basis count: {not_minimal} out of {num_samples}")
   return histogram
 
+def plot_z_in_disk(D, num_samples=1000, log=False):  
+  minimal_count = 0
+  swapped = 0
+  points = []
+  for _ in range(num_samples):
+    class_group_element = random_class_group_element(D)
+    v, u = class_group_element_to_vector_in_QQ(class_group_element)
+    try :
+      test_minimal_basis(v, u, D)
+      minimal_count += 1
+    except AssertionError:
+      pass
+    
+
+    if norm(v, D) > norm(u, D):
+      swapped += 1
+      v, u = u, v 
+    #z = v/u
+    z = ((v[0]*u[0]+v[1]*u[1])/(u[0]**2+u[1]**2), (v[1]*u[0]-v[0]*u[1])/(u[0]**2+u[1]**2))
+    points.append(z)
+  
+  
+  print(f"Minimal basis count: {minimal_count} out of {num_samples}")
+  xs, ys = zip(*points)
+
+  plt.figure(figsize=(6,6))
+
+  #log points
+  if log:
+    with open(f"points_{D}_samples_{num_samples}.txt", "w") as f:
+      for z in points:
+        f.write(f"({float(z[0])}, {float(z[1])})\n")
+  # plot the points
+  plt.scatter(xs, ys, s=3, alpha=1, color='black')
+  
+
+  # draw the unit circle
+  theta = np.linspace(0, 2*np.pi, 300)
+  circle_x = np.cos(theta)
+  circle_y = np.sin(theta)
+
+  plt.plot(circle_x, circle_y, 'r', label='|z| = 1')
+  
+  #plt.axhline(0)
+  #plt.axvline(0)
+  
+  plt.xlim(-1, 1)
+  plt.ylim(-1, 1)
+
+  #plt.gca().set_aspect('equal', adjustable='box')
+  plt.gca().set_aspect('equal')
+
+
+  plt.title(
+    f"Points z = v/u in the complex plane\n"
+    f"Class group with discriminant D = {D}, samples = {num_samples}"
+  )
+  plt.suptitle(f"Swapped: {swapped} out of {num_samples}")
+  plt.xlabel("Re(z)")
+  plt.ylabel("Im(z)")
+  plt.legend()
+
+  plt.savefig(f"Disk_{D}_samples_{num_samples}.png")
+
+  plt.show()
+
+
   
 if __name__ == "__main__":
   d1 = 3 * 11 * 2 ** 503 - 1
@@ -279,6 +346,8 @@ if __name__ == "__main__":
   d4 = 3 * 17 * 2 ** 2026 - 1
   d5 = 3 * 3 * 7 * 2 ** 4084 - 1
 
+  D = 5 * 2**32 - 1
+
   #NOTE: the discriminant D is -d, so -d1, -d2, -d3, -d4, -d5
   if False:
     class_group_element = random_class_group_element(-d1)
@@ -286,7 +355,8 @@ if __name__ == "__main__":
     v, u = class_group_element_to_vector_in_QQ(class_group_element)
     print(f"Corresponding vector in QQ^2: v={v}, u={u}")
 
-  histogram = histogram_of_lattice_reduction(-d3, 500, log=True)
+  histogram = histogram_of_lattice_reduction(-D, 10000, log=False)
+  #plot_z_in_disk(-D, num_samples=10000, log=True)
 
   if False:
     p,b = class_group_element
