@@ -97,9 +97,9 @@ d5 = 3 * 3 * 7 * 2 ** 4084 - 1
 
 
 #Wesolowski’s hash-to-class group construction (not hash but random sampling)
-def random_class_group_element(D):
+def random_class_group_element(D, multi=1):
   assert D % 4 == 1 or D % 4 == 0, "D should be congruent to 1 mod 4 or 0 mod 4"
-  n = (bit_length_n(D)) * 10
+  n = (bit_length_n(D)) * multi
   #rejection sampling
   while True:
     p = sage_random_prime(n)
@@ -200,7 +200,7 @@ def class_group_element_to_vector_in_QQ(element):
   return v, u
 
 #----------------Histogram----------------#
-def histogram_of_lattice_reduction(D, num_samples, log=False):
+def histogram_of_lattice_reduction(D, num_samples, log=False, multi=10):
   if -D == 3 * 11 * 2 ** 503 - 1:
     d_str = "d1"
   elif -D == 3 * 5 * 2 ** 1004 - 1:
@@ -211,6 +211,8 @@ def histogram_of_lattice_reduction(D, num_samples, log=False):
     d_str = "d4"
   elif -D == 3 * 3 * 7 * 2 ** 4084 - 1:
     d_str = "d5"
+  elif -D == 5 * 2**32 - 1:
+    d_str = "5 * 2**32 - 1"
   else:  d_str = f"D={D}"
 
   histogram = {}
@@ -218,10 +220,10 @@ def histogram_of_lattice_reduction(D, num_samples, log=False):
   not_minimal = 0
 
   for _ in range(num_samples):
-    class_group_element = random_class_group_element(D)
+    class_group_element = random_class_group_element(D, multi=multi)
     
-    if log:
-      cglog = f"classgroupelementslog_{d_str}_{num_samples}.txt"
+    if False:
+      cglog = f"classgroupelementslog_{d_str}_{num_samples}_multi_{multi}.txt"
       with open(cglog, "a") as f:
         f.write(f"p = {class_group_element[0]}, b = {class_group_element[1]}\n")
 
@@ -247,7 +249,7 @@ def histogram_of_lattice_reduction(D, num_samples, log=False):
 
   #log
   if log:
-    histogram_file = f"histogram_{d_str}_{num_samples}.txt"
+    histogram_file = f"histogram_{d_str}_{num_samples}_multi_{multi}.txt"
     with open(histogram_file, "w") as f:
       for L in L_values:
         f.write(f"L = {L}: {histogram[L]}\n")
@@ -266,7 +268,8 @@ def histogram_of_lattice_reduction(D, num_samples, log=False):
     f"Discriminant D = {d_str}, samples = {num_samples}"
   )
 
-  plt.savefig(f"histogram_{d_str}_samples_{num_samples}.png")
+  plt.savefig(f"histogram_{d_str}_samples_{num_samples}_multi_{multi}.png")
+  plt.show()
 
   print(f"Not minimal basis count: {not_minimal} out of {num_samples}")
   return histogram
@@ -284,16 +287,23 @@ def plot_z_in_disk(D, num_samples=1000, log=False):
     except AssertionError:
       pass
     
-
-    if norm(v, D) > norm(u, D):
+    #NOTE z needs to be in B = { z | 0 <= Re(z) <= 1} and in the disk D = { z | Re(1/z) >= 1}
+    #z = v/u
+    if ((v[0]*u[0] + abs(D)*v[1]*u[1]) / (v[0]**2 + abs(D)*v[1]**2)) < 1: #Re(1/z) < 1 i.e z is outside the disk
       swapped += 1
       v, u = u, v 
-    #z = v/u
-    z = ((v[0]*u[0]+v[1]*u[1])/(u[0]**2+u[1]**2), (v[1]*u[0]-v[0]*u[1])/(u[0]**2+u[1]**2))
+
+    z = ((v[0]*u[0] + abs(D)*v[1]*u[1]) / (u[0]**2 + abs(D)*u[1]**2), (abs(D))**(0.5)*(v[1]*u[0] - v[0]*u[1]) / (u[0]**2 + abs(D)*u[1]**2))
+
+    # z is now such that Re(1/z) >= 1
+    if z[0] < 0 or z[0] > 1:
+     z = (z[0] - math.floor(z[0]), z[1]) #shift to get back in the fundamental domain
+      
+    assert z[0] >= 0 and z[0] <= 1, f"Re(z) should be in [0,1], got {z[0]}"
     points.append(z)
-  
-  
+
   print(f"Minimal basis count: {minimal_count} out of {num_samples}")
+  print(f"Swapped: {swapped} out of {num_samples}")
   xs, ys = zip(*points)
 
   plt.figure(figsize=(6,6))
@@ -307,17 +317,18 @@ def plot_z_in_disk(D, num_samples=1000, log=False):
   plt.scatter(xs, ys, s=3, alpha=1, color='black')
   
 
-  # draw the unit circle
+  # draw the circle (x-1/2)^2 + y^2 = (1/2)^2
   theta = np.linspace(0, 2*np.pi, 300)
-  circle_x = np.cos(theta)
-  circle_y = np.sin(theta)
+  circle_x = 0.5 + 0.5 * np.cos(theta)
+  circle_y = 0.5 * np.sin(theta)
 
-  plt.plot(circle_x, circle_y, 'r', label='|z| = 1')
+
+  plt.plot(circle_x, circle_y, 'r', label='Re(1/z) = 1')
   
   #plt.axhline(0)
   #plt.axvline(0)
   
-  plt.xlim(-1, 1)
+  plt.xlim(-0.5, 1.5)
   plt.ylim(-1, 1)
 
   #plt.gca().set_aspect('equal', adjustable='box')
@@ -337,6 +348,42 @@ def plot_z_in_disk(D, num_samples=1000, log=False):
 
   plt.show()
 
+def multiple_histograms(D, num_samples, multi_list):
+  plt.figure()
+  for multi in multi_list:
+    histogram = {}
+    for _ in range(num_samples):
+      class_group_element = random_class_group_element(D, multi=multi)
+      v, u = class_group_element_to_vector_in_QQ(class_group_element)
+      (vm, um), L = lattice_reduction_2dim(v, u, D)
+      if L not in histogram:
+        histogram[L] = 1
+      histogram[L] += 1
+    
+    L_values = sorted(histogram.keys())
+    counts = [histogram[L] for L in L_values]
+    
+    
+    plt.bar(
+    L_values,
+    counts,
+    alpha=0.5,                #transparency
+    label=f"exp times {multi}" 
+    )
+    print(f"multi={multi} ploted")
+
+  plt.xlabel("Number of reduction steps L")
+  plt.ylabel("Frequency")
+
+  plt.title(
+    f"Histogram of lattice reduction steps\n"
+    f"Discriminant D = 5 * 2**32 - 1, samples = {num_samples}"
+  )
+  plt.legend()
+  plt.tight_layout()
+  plt.savefig(f"multiple_histogram_samples_{num_samples}.png")
+  plt.show()
+  return plt
 
   
 if __name__ == "__main__":
@@ -355,8 +402,9 @@ if __name__ == "__main__":
     v, u = class_group_element_to_vector_in_QQ(class_group_element)
     print(f"Corresponding vector in QQ^2: v={v}, u={u}")
 
-  histogram = histogram_of_lattice_reduction(-D, 10000, log=False)
-  #plot_z_in_disk(-D, num_samples=10000, log=True)
+  histogram = histogram_of_lattice_reduction(-D, 10000, log=True, multi=20)
+  #plot_z_in_disk(-D, num_samples=1000, log=True)
+  #multiple_histograms(-D, num_samples=1000, multi_list=[10, 11, 12, 13])
 
   if False:
     p,b = class_group_element
