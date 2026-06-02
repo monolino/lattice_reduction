@@ -1,11 +1,29 @@
 from sage.all import *
 from DominantEigenvalue.DominantEigenvalue import matrix_T_m
+import numpy as np
 
 a= QQ(1)/2 #1/2 as element in Q
 x = var('x')
 precision = 200
 CF = ComplexField(precision)
 
+def compute_eigenvectors(m):
+  A = matrix_T_m(m)
+  data_left = A.eigenvectors_left()
+  data_right = A.eigenvectors_right()
+  lambda_dom_r, ev_right, mult_r = max(data_right, key=lambda data: abs(data[0])) #right eigenvector corresponding to the dominant eigenvalue
+  lambda_dom_l, ev_left, mult_l = max(data_left, key=lambda data: abs(data[0])) #left eigenvector corresponding to the dominant eigenvalue
+  
+  ev_right = ev_right[0]
+  ev_left = ev_left[0]
+
+  #scale right eigenvector such that f(0) = 1
+  ev_right = ev_right / ev_right[0]
+
+  #normalize the eigenvectors such that <ev_left, ev_right> = 1 i.e dual
+  norm = ev_left.dot_product(ev_right)
+  ev_left = ev_left / norm
+  return ev_left, ev_right
 
 def u(t):
   return 1/(1+t)**2
@@ -42,47 +60,27 @@ def constant_c(m):
   #f*[u] = ev_levt * [u]
   return real_part(ev_left.dot_product(coeff_vector_u(m)))
 
-def dual_f_star(x, m):
-  A = matrix_T_m(m)
-  data_left = A.eigenvectors_left()
-  data_right = A.eigenvectors_right()
-  lambda_dom_r, ev_right, mult_r = max(data_right, key=lambda data: abs(data[0])) #right eigenvector corresponding to the dominant eigenvalue
-  lambda_dom_l, ev_left, mult_l = max(data_left, key=lambda data: abs(data[0])) #left eigenvector corresponding to the dominant eigenvalue
-  
-  ev_right = ev_right[0]
-  ev_left = ev_left[0]
-
-  #scale right eigenvector such that f(0) = 1 TODO: do this normalization also for dominant eigenvector.
-  ev_right = ev_right / ev_right[0]
-
-  #normalize the eigenvectors
-  norm = ev_left.dot_product(ev_right)
-  ev_left = ev_left / norm
-
-  
+def dual_f_star(x, m, ev_left=None):
+  if ev_left is None:
+    ev_left, _ = compute_eigenvectors(m)
+    
   if abs(imag_part(ev_left.dot_product(x))) > 1e-10:
     print("Warning: significant imaginary part:", val)
 
-
   return real_part(ev_left.dot_product(x))
 
-def eigenvector_f(x, m):
-  A = matrix_T_m(m)
-  data_left = A.eigenvectors_left()
-  data_right = A.eigenvectors_right()
-  lambda_dom_r, ev_right, mult_r = max(data_right, key=lambda data: abs(data[0])) #right eigenvector corresponding to the dominant eigenvalue
-  lambda_dom_l, ev_left, mult_l = max(data_left, key=lambda data: abs(data[0])) #left eigenvector corresponding to the dominant eigenvalue
-  
-  ev_right = ev_right[0]
-  ev_left = ev_left[0]
+def eigenvector_f(w, m, ev_right=None):
+  if ev_right is None:
+    _, ev_right = compute_eigenvectors(m)
 
-  #scale right eigenvector such that f(0) = 1 TODO: do this normalization also for dominant eigenvector.
-  ev_right = ev_right / ev_right[0]
+  val = 0
+  for i in range(m):
+    val += ev_right[i] * (w - 1/2)**i
 
-  if abs(imag_part(ev_right.dot_product(x))) > 1e-10:
-    print("Warning: significant imaginary part:", val)
+  if abs(imag_part(val)) < 10**(-precision/2):
+    return real_part(val)
 
-  return real_part(ev_right.dot_product(x))
+  return val
 
 def Constant_C_4(k, m, pdf, grid_res=100):
   def integral(m, pdf, grid_res):
@@ -97,11 +95,15 @@ def Constant_C_4(k, m, pdf, grid_res=100):
     dx = x[1] - x[0]
     dy = y[1] - y[0]
 
-    integrand_vals = np.zeros_like(X) #zero array for integrand values
+    #only compute ev_right once not every time in the loop
+    _, ev_right = compute_eigenvectors(m)
+
+    integrand_vals = np.zeros_like(X, dtype=complex) #zero array for integrand values
     for i in range(grid_res):
       for j in range(grid_res):
         point = np.array([X[i, j], Y[i, j]])
-        f_val = eigenvector_f(point, m) #value of f
+        w = X[i, j] + 1j * Y[i, j]
+        f_val = eigenvector_f(w, m, ev_right) #value of f
         pdf_val = pdf(point) #value of pdf
         integrand_vals[i, j] = f_val * pdf_val
     
@@ -111,7 +113,10 @@ def Constant_C_4(k, m, pdf, grid_res=100):
     #NOTE when one wants to improve precision look at np.sum(pdf_values, dtype=np.float128) or use math.fsum
   
   C_4 = integral(m, pdf, grid_res)
-  return C_4
+  if abs(imag_part(C_4)) > 1e-10:
+    print("Warning: significant imaginary part in C_4:", C_4)
+  print("C_4 (complex):", C_4)
+  return real_part(C_4)
 
 if __name__ == "__main__":
   m = 16
@@ -120,8 +125,10 @@ if __name__ == "__main__":
 
   e0 = vector([1] + [0]*(m-1)) #constant 1 is (1,0,...,0) in the basis (x-a)^i
   m = 16
-  print('f*[1] = ', dual_f_star(e0, m))
-  print('f[1] = ', eigenvector_f(e0, m))
+  #print('f*[1] = ', dual_f_star(e0, m))
+  #print('f[1] = ', eigenvector_f(0.2 + 0j, m))
 
-  print('Constant C_4 = ', Constant_C_4(k=4, m=m, pdf=?))
+  #print('Constant C_4 = ', Constant_C_4(k=4, m=m, pdf=lambda x: np.exp(- x[1] ** 2 / ( 2* 0.01 ** 2)), grid_res=100))
+
+  print(f"eigenvectors for m={m}: ", compute_eigenvectors(m))
   
