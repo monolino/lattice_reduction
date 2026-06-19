@@ -9,7 +9,8 @@ Binomial: binomial(n,k)
 #variables
 m, s, t, x = var('m s t x')
 precision = 600 #precision in bits
-CF = ComplexField(precision) 
+CF = ComplexField(precision)
+RR = RealField(precision) 
 a = QQ(1)/2 #1/2 as element in Q
 
 
@@ -46,15 +47,16 @@ def find_M(f):
         M += 1
     return M
 
-def M_coeff(i,j):
-    value = CF(0)
+def M_coeff(i,j, s=4):
+    value = RR(0)
     for l in range(0,j+1):
-        value += binomial(j,l)* binomial(i+l+3,i) * (-a)**(j-l) * hurwitz_zeta(4+l+i,a+1)
+        value += binomial(j,l)* binomial(i+l+(s-1),i) * (-a)**(j-l) * hurwitz_zeta(s+l+i,a+1)
     value *= (-1)**i
+    
     return value.n(precision)
 
-def matrix_T_m(m):
-    return matrix(CF, m, m,lambda i, j: M_coeff(i, j))
+def matrix_T_m(m, s=4):
+    return matrix(RR, m, m,lambda i, j: M_coeff(i, j, s))
 
 
 def G_div_f_numeric(f,s,M,t,precision=precision):
