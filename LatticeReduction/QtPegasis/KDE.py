@@ -87,7 +87,6 @@ def holomorphic_gaussian_2D(z, sigma, holomorphic=True):
     return np.exp(- z ** 2 / (  sigma ** 2))
   return np.exp(- np.imag(z) ** 2 / ( 2* sigma ** 2))
 
-
 def plot_gaussian_2D(mean, cov):
   x = np.linspace(0, 1, 100)
   y = np.linspace(-0.5, 0.5, 100)
@@ -183,15 +182,16 @@ if __name__ == "__main__":
   #print(f"H:\n{H}\nH_det: {H_det}\nH_inv:\n{H_inv}")
   #plot_pdf(samples, H_det, H_inv)
 
-  #factor = 1.0
-  #h = get_h(samples, factor)
-  #plot_pdf_1D(samples, h)
-  mean = np.array([0.5, 0]) 
+  samples = get_samples('points_-21474836479_samples_10000_multi_23.txt')
+  factor = 1.0
+  h = get_h(samples, factor)
+  plot_pdf_1D(samples, h)
+  #mean = np.array([0.5, 0]) 
   
-  cov = [
-    [0.16, 0],    # σx = 0.2  (wide)
-    [0, 0.0004]   # σy = 0.02 (very thin)
-  ] 
+  #cov = [
+  #  [0.16, 0],    # σx = 0.2  (wide)
+  #  [0, 0.0004]   # σy = 0.02 (very thin)
+  #] 
 
-  plot_gaussian_2D(mean, cov)
+  #plot_gaussian_2D(mean, cov)
   #plot_holomorphic_gaussian_2D(sigma=0.01, holomorphic=False)

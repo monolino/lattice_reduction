@@ -274,12 +274,12 @@ def histogram_of_lattice_reduction(D, num_samples, log=False, multi=10):
   print(f"Not minimal basis count: {not_minimal} out of {num_samples}")
   return histogram
 
-def plot_z_in_disk(D, num_samples=1000, log=False):  
+def plot_z_in_disk(D, num_samples=1000, multi=1, log=False):  
   minimal_count = 0
   swapped = 0
   points = []
   for _ in range(num_samples):
-    class_group_element = random_class_group_element(D)
+    class_group_element = random_class_group_element(D, multi=multi)
     v, u = class_group_element_to_vector_in_QQ(class_group_element)
     try :
       test_minimal_basis(v, u, D)
@@ -310,7 +310,7 @@ def plot_z_in_disk(D, num_samples=1000, log=False):
 
   #log points
   if log:
-    with open(f"points_{D}_samples_{num_samples}.txt", "w") as f:
+    with open(f"points_{D}_samples_{num_samples}_multi_{multi}.txt", "w") as f:
       for z in points:
         f.write(f"({float(z[0])}, {float(z[1])})\n")
   # plot the points
@@ -344,7 +344,7 @@ def plot_z_in_disk(D, num_samples=1000, log=False):
   plt.ylabel("Im(z)")
   plt.legend()
 
-  plt.savefig(f"Disk_{D}_samples_{num_samples}.png")
+  plt.savefig(f"Disk_{D}_samples_{num_samples}_multi_{multi}.png")
 
   plt.show()
 
@@ -402,8 +402,9 @@ if __name__ == "__main__":
     v, u = class_group_element_to_vector_in_QQ(class_group_element)
     print(f"Corresponding vector in QQ^2: v={v}, u={u}")
 
-  histogram = histogram_of_lattice_reduction(-D, 10000, log=True, multi=20)
-  #plot_z_in_disk(-D, num_samples=1000, log=True)
+  multi = 10
+  #histogram = histogram_of_lattice_reduction(-D, 10000, log=True, multi=multi)
+  plot_z_in_disk(-D, num_samples=10000, log=True, multi=multi)
   #multiple_histograms(-D, num_samples=1000, multi_list=[10, 11, 12, 13])
 
   if False:
