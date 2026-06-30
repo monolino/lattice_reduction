@@ -25,14 +25,14 @@ class Disk:
     b_x = float(self.center[0] + sqrt_term)
     return (a_x, b_x)
 
-  def plot(self, ax, color='black', alpha=0.5):
+  def plot(self, ax, color='black', alpha=0.5, label=None):
     theta = np.linspace(0, 2*np.pi, 300)
     center_x, center_y = self.center
     
     x = center_x + self.radius * np.cos(theta)
     y = center_y + self.radius * np.sin(theta)
 
-    ax.fill(x, y, color=color, alpha=alpha)
+    ax.fill(x, y, color=color, alpha=alpha, label=label)
 
 
 class Domain_D_k:
@@ -63,19 +63,35 @@ class Domain_D_k:
         words.append(w + [m])
     return words
 
-  @staticmethod
-  
-  def next_word(word, m_max):
-    word = word[:]  # copy
+  def next_word(self, word, d, m_max):
+    w = word[:]  # copy
 
-    for i in reversed(range(len(word))):
-      if word[i] < m_max:
-        word[i] += 1
-        for j in range(i+1, len(word)):
-          word[j] = 1
-        return word
+    for i in range(len(w) - 1, -1, -1):
+      if w[i] == m_max:
+        w[i] = 1 #reset
+      else:
+        w[i] += 1
+        word_length = self.check_word_radius(w,d)
+        if word_length is None:
+          w[i] = 1
+        else: return word_length #found valid next word
+    return None #came back to word [1,1,1,...,1] so with this m_max no further disks
+
 
   
+  def check_word_radius(self, w, d):
+    a, b = apply_word(w, 0), apply_word(w, 1)
+    radius = abs(a - b) / 2
+    center = abs(a + b) / 2
+    #log
+    with open(f"Word_log_k_{self.k}.txt", "a") as f:
+      f.write(f"[{min(a,b):.6f}, {max(a,b):.6f}], radius = {radius:.6f}, word = {w}\n")
+    disk = Disk(center, radius, self.k)
+    interval = disk.intersection_line(d)
+    if interval is None: return None
+    length_interval = interval[1] - interval[0]
+    return length_interval
+        
   def intervals_domain_m(self, m_max):
     #from right to left ! e.g ((1/2,1), (1/3,1/2), (1/4,1/3), ..., (1/(m+1), 1/m))
     #domains_set = []
@@ -95,14 +111,17 @@ class Domain_D_k:
     intervals = self.intervals_domain_m( m_max)
     return [Disk(center = ((a+b)/2, 0), radius= (b-a)/2, k=self.k) for (a,b) in intervals]
 
-  def plot_domain(self, ax, color='black', d=None):
+  def plot_domain(self, ax, color='black', d=None, label=None):
     if d is not None:
       m_max = self.find_m(d)
-    else: m_max = 13
+    else: m_max = 20
     set_of_disks = self.union_disks(m_max)
 
-    for d in set_of_disks:
-      d.plot(ax, color=color, alpha=0.5)
+    for i,d in enumerate(set_of_disks):
+      if i == 0:
+        d.plot(ax, color=color, alpha=0.5, label=label)
+      else:
+        d.plot(ax, color=color, alpha=0.5)
   
   def biggest_disk_in_domain(self):
     return self.union_disks(1)[0]
@@ -117,28 +136,40 @@ class Domain_D_k:
         return m
       m += 5
 
+  def blabla(self, d, m_max):
+    k = self.k
+    word = [1] * (k - 1) + [0] #next_word computes [1,1,1,...,1] the actual first word
+    word, length = self.next_word(word, d, m_max) if not None else return 0
+    while next_word is not None:
+      word, newlength = self.next_word(word, d, m_max) if not None else word, newlength = None, 0
+      length += newlength
+
+
 
     
 
-def plot_until_k(k):
+def plot_until_k(max_k):
   fig, ax = plt.subplots()
+
+  colors = plt.cm.viridis_r
 
   #Plot D_0
   D_0 = Disk(center=(0.5, 0), radius=0.5, k=0)
-  D_0.plot(ax, color='black', alpha=0.3)
+  D_0.plot(ax, color=colors(0), alpha=1, label=f"k={0}")
 
   #Plot D_k
-  for k in range(1, k+1):
+  for k in range(1, max_k+1):
+    color = colors(k / (max_k + 1))
     D_k = Domain_D_k(k)
-    color = 'black' if k%2 == 0 else 'white'
-    D_k.plot_domain(ax, color=color)
+    D_k.plot_domain(ax, color=color, label=f"k={k}")
     print(f"plot for k {k}")
   
+  ax.legend(loc="upper right")
   ax.set_aspect('equal')
   ax.set_xlim(0, 1)
   ax.set_ylim(-0.5, 0.5)
 
-  plt.savefig(f"Domains_k_{k}.png")
+  plt.savefig(f"Domains_k_{max_k}.png")
   plt.show()
 
 def line_through_domains(d):
@@ -202,6 +233,7 @@ def line_intervals_domains(d,store_intervals=True):
 
     if store_intervals: Intervals_raw[D_k.k] = list_intervals
     Length_k[D_k.k] = length_k
+    print(f"k={D_k.k}, {len(list_intervals)}")
   if store_intervals: Intervals_final = interval_dividing(Intervals_raw, Intervals_raw[0], 0, max_k)
   else: Intervals_final = {}
 
@@ -216,7 +248,7 @@ def compute_length_list_intervals(li):
   return length
 
 def plot_line_domains(d, plot_domains=False):
-  Intervals = line_intervals_domains(d)
+  Intervals,_ = line_intervals_domains(d)
   fig, ax = plt.subplots()
 
   ax.axhline(y=d, color='black', linestyle='--', linewidth=1) #line L_d
@@ -296,18 +328,8 @@ def total_length_intervals(d):
     if k != 0:
       total_length[k-1] -= length_k 
 
-
-
-
-
-
-
-
-
 def histogram_for_k(d, plot=True):
-  Domains = line_through_domains(d)
-
-
+  _, Length_dict = line_intervals_domains(d, store_intervals=False)
     
   if not plot:
     return Length_dict
@@ -331,10 +353,11 @@ if __name__ == "__main__":
   #plot_until_k(5)
   D_1 = Domain_D_k(0)
   #print(D_1.biggest_disk_in_domain().center)
-  d = 5e-44
+  d = 0.05#2e-10#5e-44
   #print( line_intervals_domains(d))
-  #plot_line_domains(d, plot_domains=True)
+  #plot_line_domains(d, plot_domains=False)
   histogram_for_k(d)
+  
     
 
 

@@ -1,0 +1,36 @@
+from itertools import product
+
+def apply_word(word, z):
+  for m in reversed(word):
+    z = 1 / (m + z)
+  return z
+
+def radius_of_word(word):
+  a, b = apply_word(word,0), apply_word(word,1)
+  radius = abs( a - b)/2
+  center = abs(a+b)/2
+  return radius, center
+
+def sort_results(results):
+  return sorted(results, key=lambda x: x["radius"])
+
+def continued_fractions(m_max, k):
+  results = []
+  for word in product(range(1, m_max + 1), repeat=k):
+    radius, center = radius_of_word(word)
+    results.append({
+      "word": list(word),
+      "radius": radius,
+      "center": center
+    })
+  return results
+
+result = continued_fractions(7,3)
+
+sortedresult = sort_results(result)
+
+
+for r in result:
+  print(r["word"], r["radius"])
+
+  

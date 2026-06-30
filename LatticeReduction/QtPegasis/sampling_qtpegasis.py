@@ -289,9 +289,9 @@ def plot_z_in_disk(D, num_samples=1000, multi=1, log=False):
     
     #NOTE z needs to be in B = { z | 0 <= Re(z) <= 1} and in the disk D = { z | Re(1/z) >= 1}
     #z = v/u
-    if ((v[0]*u[0] + abs(D)*v[1]*u[1]) / (v[0]**2 + abs(D)*v[1]**2)) < 1: #Re(1/z) < 1 i.e z is outside the disk
-      swapped += 1
-      v, u = u, v 
+    #if ((v[0]*u[0] + abs(D)*v[1]*u[1]) / (v[0]**2 + abs(D)*v[1]**2)) < 1: #Re(1/z) < 1 i.e z is outside the disk
+    #  swapped += 1
+    #  v, u = u, v 
 
     z = ((v[0]*u[0] + abs(D)*v[1]*u[1]) / (u[0]**2 + abs(D)*u[1]**2), (abs(D))**(0.5)*(v[1]*u[0] - v[0]*u[1]) / (u[0]**2 + abs(D)*u[1]**2))
 
@@ -299,7 +299,7 @@ def plot_z_in_disk(D, num_samples=1000, multi=1, log=False):
     if z[0] < 0 or z[0] > 1:
      z = (z[0] - math.floor(z[0]), z[1]) #shift to get back in the fundamental domain
       
-    assert z[0] >= 0 and z[0] <= 1, f"Re(z) should be in [0,1], got {z[0]}"
+    #assert z[0] >= 0 and z[0] <= 1, f"Re(z) should be in [0,1], got {z[0]}"
     points.append(z)
 
   print(f"Minimal basis count: {minimal_count} out of {num_samples}")
@@ -402,8 +402,8 @@ if __name__ == "__main__":
     v, u = class_group_element_to_vector_in_QQ(class_group_element)
     print(f"Corresponding vector in QQ^2: v={v}, u={u}")
 
-  multi = 10
-  #histogram = histogram_of_lattice_reduction(-D, 10000, log=True, multi=multi)
+  multi = 2
+  histogram = histogram_of_lattice_reduction(-D, 10000, log=True, multi=multi)
   plot_z_in_disk(-D, num_samples=10000, log=True, multi=multi)
   #multiple_histograms(-D, num_samples=1000, multi_list=[10, 11, 12, 13])
 
