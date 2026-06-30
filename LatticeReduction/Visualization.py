@@ -127,14 +127,13 @@ class Domain_D_k:
     return self.union_disks(1)[0]
 
   def find_m(self, d):
-    m = 5 #can be adjustable when one knows the d will be small so in many disks. Then take bigger m to start with
-    
+    m = 1
     while True:
-      union_disks = self.union_disks(m)
-
-      if (disks.radius < abs(d) for disks in union_disks):
+      word = [m for _ in range(self.k)]
+      a, b = apply_word(word,0), apply_word(word,1)
+      radius = abs( a - b)/2
+      if radius < d:
         return m
-      m += 5
 
   def blabla(self, d, m_max):
     k = self.k
