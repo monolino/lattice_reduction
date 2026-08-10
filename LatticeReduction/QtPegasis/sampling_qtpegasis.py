@@ -292,9 +292,10 @@ def plot_z_in_disk(D, num_samples=1000, multi=1, log=False):
     #if ((v[0]*u[0] + abs(D)*v[1]*u[1]) / (v[0]**2 + abs(D)*v[1]**2)) < 1: #Re(1/z) < 1 i.e z is outside the disk
     #  swapped += 1
     #  v, u = u, v 
-
-    z = ((v[0]*u[0] + abs(D)*v[1]*u[1]) / (u[0]**2 + abs(D)*u[1]**2), (abs(D))**(0.5)*(v[1]*u[0] - v[0]*u[1]) / (u[0]**2 + abs(D)*u[1]**2))
-
+    print(f"v = {v}, u = {u}")
+    #z = ((v[0]*u[0] + abs(D)*v[1]*u[1]) / (u[0]**2 + abs(D)*u[1]**2), (abs(D))**(0.5)*(v[1]*u[0] - v[0]*u[1]) / (u[0]**2 + abs(D)*u[1]**2))
+    z = ( u[0]/v[0], np.sqrt(abs(D)) * u[1]/v[0] ) #z = u/v 
+    print(f"z = {z}")
     # z is now such that Re(1/z) >= 1
     if z[0] < 0 or z[0] > 1:
      z = (z[0] - math.floor(z[0]), z[1]) #shift to get back in the fundamental domain
@@ -402,8 +403,8 @@ if __name__ == "__main__":
     v, u = class_group_element_to_vector_in_QQ(class_group_element)
     print(f"Corresponding vector in QQ^2: v={v}, u={u}")
 
-  multi = 2
-  histogram = histogram_of_lattice_reduction(-D, 10000, log=True, multi=multi)
+  multi = 3
+  #histogram = histogram_of_lattice_reduction(-D, 10000, log=True, multi=multi)
   plot_z_in_disk(-D, num_samples=10000, log=True, multi=multi)
   #multiple_histograms(-D, num_samples=1000, multi_list=[10, 11, 12, 13])
 
