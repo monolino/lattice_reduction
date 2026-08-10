@@ -130,7 +130,7 @@ class Domain_D_k:
     m = 1
     while True:
       word = [m for _ in range(self.k)]
-      a, b = apply_word(word,0), apply_word(word,1)
+      a, b = self.apply_word(word,0), self.apply_word(word,1)
       radius = abs( a - b)/2
       if radius < d:
         return m
@@ -138,9 +138,14 @@ class Domain_D_k:
   def blabla(self, d, m_max):
     k = self.k
     word = [1] * (k - 1) + [0] #next_word computes [1,1,1,...,1] the actual first word
-    word, length = self.next_word(word, d, m_max) if not None else return 0
+
+    res = self.next_word(word, d, m_max)
+    if res is None:
+      return 0
+    else:
+      word, length = res
     while next_word is not None:
-      word, newlength = self.next_word(word, d, m_max) if not None else word, newlength = None, 0
+      #word, newlength = self.next_word(word, d, m_max) if not None else word, newlength = None, 0
       length += newlength
 
 
@@ -353,9 +358,11 @@ if __name__ == "__main__":
   D_1 = Domain_D_k(0)
   #print(D_1.biggest_disk_in_domain().center)
   d = 0.05#2e-10#5e-44
+
+  d = 0.00714 #2857142857143
   #print( line_intervals_domains(d))
-  #plot_line_domains(d, plot_domains=False)
-  histogram_for_k(d)
+  plot_line_domains(d, plot_domains=True)
+  #histogram_for_k(d)
   
     
 

@@ -40,9 +40,12 @@ if __name__ == "__main__":
   filename4 = "Total_Length_Lineintersection_d_1.0620646970966825e-09.txt"
   filename3 = "QtPegasis/histogram_5 * 2**32 - 1_10000_multi_3 copy.txt"
   data = read_data(filename1)
+  data2 = read_data(filename3)
   print(data)
   q_p = quantiles(data, set_p)
+  q_p_2 = quantiles(data2, set_p)
   print("Quantiles for p values:", q_p)
-  stats.probplot(q_p, dist="norm", plot=plt)
+  #stats.probplot(data, dist="norm", plot=plt)
+  stats.probplot(data2, dist="norm", plot=plt)
   plt.title("Normal Q-Q Plot")
   plt.show()

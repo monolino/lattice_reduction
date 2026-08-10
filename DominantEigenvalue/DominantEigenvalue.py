@@ -8,7 +8,7 @@ Binomial: binomial(n,k)
 
 #variables
 m, s, t, x = var('m s t x')
-precision = 600 #precision in bits
+precision = 200 #precision in bits
 CF = ComplexField(precision)
 RR = RealField(precision) 
 a = QQ(1)/2 #1/2 as element in Q
@@ -84,7 +84,7 @@ def lambda_estimate(s,M,m):
     '''
     with noticing that Gf/f has a plateau over [0.1,0.8] i.e is nearly constant there
     '''
-    p_m = p(m)
+    p_m = p(m,s)
     alpha,beta = alpha_beta(p_m,s,M,m,0.1,0.8)
     alpha = str(alpha)
     beta = str(beta)
@@ -96,8 +96,8 @@ def lambda_estimate(s,M,m):
             break   
     return lambda_m.rstrip('.')
 
-def p(m):
-    A = matrix_T_m(m)
+def p(m,s=4):
+    A = matrix_T_m(m, s)
     data = A.eigenvectors_right() #[eigval, [tuple], mult]
     dom = max(data, key=lambda data: abs(data[0])) #[dominanteigval, [dominant eigenvector], multiplicity]
     lambda_dom = dom[0]
@@ -121,14 +121,15 @@ def p(m):
 if __name__ == "__main__" :
     their_eigfunc = lambda t: 1-87/50*(t-a)+ 391/200*(t-a)**2 - 1687/1000*(t-a)**3
     
-    m=64
+    m=32
+    s=6
     #p = p(m)
     #alpha, beta = alpha_beta(p,4,10000,m)
     #print(alpha.n(53), " , ", beta.n(53))
-    print('lambda: ', lambda_estimate(4,1000,m))
+    #print('lambda: ', lambda_estimate(4,1000,m))
     #print('alpha, beta = ', alpha_beta(4,1000,16))
 
     #alpha = min(G_s(f,s), t)
 
-    #print(p(m))
+    print(p(m,s))
 
