@@ -8,7 +8,7 @@ Binomial: binomial(n,k)
 
 #variables
 m, s, t, x = var('m s t x')
-precision = 200 #precision in bits
+precision = 600 #precision in bits
 CF = ComplexField(precision)
 RR = RealField(precision) 
 a = QQ(1)/2 #1/2 as element in Q

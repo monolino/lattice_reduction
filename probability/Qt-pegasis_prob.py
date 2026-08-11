@@ -19,8 +19,12 @@ def get_samples(filename):
 #========================= PDF function and F(w,/overline{w}) = pdf(w) =========================#
 
 def pdf(z):
+  # d=0
+  #d = 1e-9
+  #d = 2.5027632403871487e-05 #mean
+  d = 1.0620646970966825e-09 #lower bound
   #z is a complex number
-  return np.exp(- z.imag ** 2 / ( 2* 0.05 ** 2)) #sigma=0.05
+  return np.exp(- (z.imag - d) ** 2 / ( 2* 0.05 ** 2)) #sigma=0.05
 
 def F(u,v):
   return  np.exp(-((v-u)/(2 * 1j))**2 * (1/(2*0.05**2))) #sigma=0.05
@@ -144,6 +148,34 @@ def f_to_vector(function, m, sample_points, samples=100, A=None, f_vals=None):
   print(coeffs)
   return coeffs
 
+def f_to_vector_any_function(function, m, samples=100,A=None, f_vals=None):
+  
+  def get_A_f_points(samples, m):
+    '''sparse grid'''
+    x = np.linspace(0, 1, samples)
+    y = np.linspace(0, 1, samples)
+    X, Y = np.meshgrid(x, y)
+    mask = (X - 0.5)**2 + Y**2 <= 0.25
+    Z = X + 1j * Y
+
+    grid_points = Z[mask]
+
+    f_vals = np.array([function(z) for z in grid_points])
+    print(f_vals)
+
+    A = np.vstack([basis(z, m) for z in grid_points])
+    return A, f_vals, grid_points
+  
+  if A is None and f_vals is None:
+    A, f_vals, _ = get_A_f_points(samples, m)
+    with open(f"Matrix_A_fVal_m_{m}_pdf.txt", "w") as f:
+      f.write(f"{A}\n{f_vals}\n")
+
+  'solve Ac = f'
+  coeffs, *_ = np.linalg.lstsq(A, f_vals, rcond=None)
+  print(coeffs)
+  return coeffs
+
 
 
 #============================= Probability parts =============================#
@@ -209,14 +241,24 @@ def prob_estimate_kde(k, m, sample_points, C_4=None, grid_res=100,multi=1):
     f.write(f"k= {k}\nlam= {lam}\nC_4= {C_4}\nf*[f]= {dualval}\nP[L>=k+1]= {proba}")
   return proba
 
+def f_dual_of_pdf(m, pdf):
+  #d = 1e-9
+  #d = 2.5027632403871487e-05 #mean
+  #d = 1.0620646970966825e-09 #lower bound
+  N = normalization_constant_N(pdf, m)
+  normalized_pdf = lambda z: N * pdf(z)
+  pdf_vector = f_to_vector_any_function(normalized_pdf, m)
+  f_dual = dual_f_star(pdf_vector, m)
+  return f_dual
+
 
 
 if __name__ == "__main__":
-  k = 30
-  m = 16
-  with open(f"C_4_value_{m}.txt", "r") as f:
-    C_4 = float(f.read().strip().split()[2])
-  print("what")
+  #k = 30
+  m = 128
+  #with open(f"C_4_value_{m}.txt", "r") as f:
+  #  C_4 = float(f.read().strip().split()[2])
+  print("START")
   #prob = probability_estimate(k=k, m=16, pdf=pdf, C_4=C_4, grid_res=300, plot=False)
   #normF = norm_F(m, pdf)
   #gap = spectral_gap(m)**k
@@ -225,13 +267,15 @@ if __name__ == "__main__":
   #norm_F(m, pdf)
   #print(spectral_gap(m))
 
-  multi=10
-  m = 64
+  #multi=10
+  #m = 64
 
-  sample_points = get_samples("probability/points_-21474836479_samples_10000_multi_10.txt")
+  #sample_points = get_samples("probability/points_-21474836479_samples_10000_multi_10.txt")
 
-  prob = prob_estimate_kde(k,m,sample_points, multi=multi)
-  normF = norm_F(m, F_kde, sample_points=sample_points)
-  gap = spectral_gap(m)**k
-  print(f"P[L >= {k} + 1] = {prob} * (1 + O({normF * gap}))")
-  print(f"error = {prob * normF * gap}")
+  #prob = prob_estimate_kde(k,m,sample_points, multi=multi)
+  #normF = norm_F(m, F_kde, sample_points=sample_points)
+  #gap = spectral_gap(m)**k
+  #print(f"P[L >= {k} + 1] = {prob} * (1 + O({normF * gap}))")
+  #print(f"error = {prob * normF * gap}")
+
+  print(f_dual_of_pdf(m, pdf))

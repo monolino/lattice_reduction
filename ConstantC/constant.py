@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 a= QQ(1)/2 #1/2 as element in Q
 x = var('x')
-precision = 200
+precision = 300
 CF = ComplexField(precision)
 
 def compute_eigenvectors(m, plot=False):
@@ -113,7 +113,7 @@ def eigenvector_f(w, m, ev_right=None):
 
   return val
 
-def Constant_C_4(k, m, grid_res=300, plot=False):
+def Constant_C_4(m, grid_res=300, plot=False):
   # C_4 = \int_D \int_[0,1] (y - y^2) f_4(x + i(1-2y)t) dy dA(w) where w = x + it
   def integral(m, grid_res):
     #grid of points for the integral dA(w)
@@ -202,7 +202,7 @@ if __name__ == "__main__":
   #print('f[1] = ', eigenvector_f(0.2 + 0j, m))
 
   
-  print('Constant C_4 = ', Constant_C_4(k=4, m=m, grid_res=400, plot=False))
+  print('Constant C_4 = ', Constant_C_4(m=m, grid_res=400, plot=False))
 
   #print(f"eigenvectors for m={m}: ", compute_eigenvectors(m, plot=True))
   
