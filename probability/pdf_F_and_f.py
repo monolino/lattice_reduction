@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 def pdf(z):
+  d=0 #concentrated at y=d
   #z is a complex number
-  return np.exp(- ((z.conjugate() - z)/(2 * 1j)) ** 2 * 1 / (  2* 0.05 ** 2))  #sigma=0.05
+  return np.exp(- ((z.conjugate() - z)/(2 * 1j)+d) ** 2 * 1 / (  2* 0.05 ** 2))  #sigma=0.05
 
 def plot_pdf_p(pdf,m, samples=100):
   #sample points in D
