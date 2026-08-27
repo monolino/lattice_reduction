@@ -67,6 +67,7 @@ class Domain_D_k:
     w = word[:]  # copy
 
     for i in range(len(w) - 1, -1, -1):
+      
       if w[i] == m_max:
         w[i] = 1 #reset
       else:
@@ -77,10 +78,8 @@ class Domain_D_k:
         else: return word_length #found valid next word
     return None #came back to word [1,1,1,...,1] so with this m_max no further disks
 
-
-  
   def check_word_radius(self, w, d):
-    a, b = apply_word(w, 0), apply_word(w, 1)
+    a, b = self.apply_word(w, 0), self.apply_word(w, 1)
     radius = abs(a - b) / 2
     center = abs(a + b) / 2
     #log
@@ -91,6 +90,27 @@ class Domain_D_k:
     if interval is None: return None
     length_interval = interval[1] - interval[0]
     return length_interval
+
+  def next_word_2(self, word, d):
+    w = word[:]
+    w_new = w+[1]
+    res = self.check_word_radius(w_new, d)
+    #if new word intersects with line return, word, length of intersection, disk
+    if res is not None: return w_new, res
+    #if new word does not intersect with line, try to find next word
+    w_new_new = w[:]
+    w_new_new[-1] += 1
+    res = self.check_word_radius(w_new_new, d)
+    if res is not None: return w_new_new, res
+    #if new word does not intersect with line, try to find next word
+    w_new_new_new = w[:-1]
+    #check if finished i.e again []
+    if w_new_new_new == []: return None
+    w_new_new_new[-1] += 1
+    res = self.check_word_radius(w_new_new_new, d)
+    if res is not None: return w_new_new_new, res
+    return self.next_word_2(w_new_new_new, d) #recursively find next word
+
         
   def intervals_domain_m(self, m_max):
     #from right to left ! e.g ((1/2,1), (1/3,1/2), (1/4,1/3), ..., (1/(m+1), 1/m))
@@ -134,23 +154,6 @@ class Domain_D_k:
       radius = abs( a - b)/2
       if radius < d:
         return m
-
-  def blabla(self, d, m_max):
-    k = self.k
-    word = [1] * (k - 1) + [0] #next_word computes [1,1,1,...,1] the actual first word
-
-    res = self.next_word(word, d, m_max)
-    if res is None:
-      return 0
-    else:
-      word, length = res
-    while next_word is not None:
-      #word, newlength = self.next_word(word, d, m_max) if not None else word, newlength = None, 0
-      length += newlength
-
-
-
-    
 
 def plot_until_k(max_k):
   fig, ax = plt.subplots()
@@ -349,8 +352,181 @@ def histogram_for_k(d, plot=True):
   plt.savefig(f"Histogram_lines_length_d{d}")
   plt.show()
 
+def plot_all_disk_intersecting_line(d):
+  k = self.k
+  word = [1] * (k - 1) + [0] #next_word computes [1,1,1,...,1] the actual first word
+
+  while new_word != None:
+    new_word, length, disk = self.next_word(word, d, m_max)
+    if new_word is not None:
+      word = new_word
+      print(f"word = {word}, length = {length}, disk = {disk}")
+    else:
+      print("No more words found")
+      break
 
 
+
+
+
+
+def apply_word(word, z):
+  for m in reversed(word):
+    z = 1 / (m + z)
+  return z
+
+def check_word_radius(w, d):
+  a, b = apply_word(w, 0), apply_word(w, 1)
+  radius = abs(a - b) / 2
+  center_x = abs(a + b) / 2
+  disk = Disk((center_x, 0), radius, k=len(w))
+  interval = disk.intersection_line(d)
+  if interval is None: return None
+  length_interval = interval[1] - interval[0]
+  return w, length_interval, disk
+
+
+def next_dfs_word(word, d):
+  #RETURNS NONE if done otherwise returns (word, (length of intersection, disk))
+  assert d != 0, "d cannot be 0, because infinite tree"
+  w = word[:]
+  child = w+[1]
+  res = check_word_radius(child, d)
+  #if new word intersects with line return, word, length of intersection, disk
+  if res is not None: return child, res
+  #if new word does not intersect with line, try to find next word
+  sibling = w[:]
+  if sibling == []: return None
+  sibling[-1] += 1
+  res = check_word_radius(sibling, d)
+  if res is not None: return sibling, res
+  #if new word does not intersect with line, try to find next word
+  parent_sibling = w[:-1]
+  #check if finished i.e again []
+  if parent_sibling == []: return None
+  parent_sibling[-1] += 1
+  res = check_word_radius(parent_sibling, d)
+  if res is not None: return parent_sibling, res
+  return next_dfs_word(parent_sibling, d) #recursively find next word
+
+
+def plot_all_disk_intersecting_line(d, plot=True):
+  word = []
+  length_k = {}
+  fig, ax = plt.subplots()
+  colors = plt.cm.viridis_r
+
+  #plot the line y = d
+  ax.axhline(y=d, color='black', linestyle='--', linewidth=1, label=f"y = {d}") #line L_d
+  #plot unit disk
+  D_0 = Disk(center=(0.5, 0), radius=0.5, k=0)
+  D_0.plot(ax, color=colors(0), alpha=1, label=f"k={0}")
+  length_k[0] = D_0.intersection_line(d)[1] - D_0.intersection_line(d)[0] if D_0.intersection_line(d) is not None else 0
+
+
+  while True:
+    res = next_dfs_word(word, d)
+    if res is None: break
+    word, (_, length, disk) = res
+    k = len(word)
+    length_k[k] = length_k.get(k, 0) + length
+    color = colors(k / 10)  # Adjust the denominator for color scaling as needed
+    if word == [1] * k: label = f"k={k}"
+    else: label = None
+    if plot: disk.plot(ax, color=color, alpha=0.5, label=label)
+
+  #recompute lengths for each k
+  total_length = {}
+  for k in length_k.keys():
+    total_length[k] = length_k[k] - length_k.get(k+1, 0)
+
+  if not plot:
+    return total_length
+   
+  #write the results
+  text = "\n".join(
+    f"k={k}: length = {total_length[k]:.3f}"
+    for k in sorted(total_length)
+  )
+
+  fig.text(0.15, 0.02, text, fontsize=9,va='bottom')
+  plt.subplots_adjust(bottom=0.3)
+  plt.title(f"Disks intersecting line y = {d}")
+  ax.set_aspect('equal')
+  ax.set_xlim(0, 1)
+  ax.set_ylim(-0.5, 0.5)
+  ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1))
+  plt.savefig(f"Disks_intersecting_line_d_{d}.png")
+  plt.show()
+
+def total_length_intersection(d):
+  word = []
+  length_k = {}
+  D_0 = Disk(center=(0.5, 0), radius=0.5, k=0)
+  length_k[0] = D_0.intersection_line(d)[1] - D_0.intersection_line(d)[0] if D_0.intersection_line(d) is not None else 0
+  while True:
+    res = next_dfs_word(word, d)
+    if res is None: break
+    word, (_, length, disk) = res
+    k = len(word)
+    length_k[k] = length_k.get(k, 0) + length
+
+  #recompute lengths for each k
+  total_length = {}
+  for k in length_k.keys():
+    total_length[k] = length_k[k] - length_k.get(k+1, 0)
+
+  for k in sorted(total_length):
+    print(f"k={k}: length = {total_length[k]:.3f}")
+
+  return total_length
+
+
+def plot_histogram_for_thesis():
+  k = np.arange(20)
+  #lengths = [0.008,0.045,0.125,0.215,0.248,0.198,0.109,0.041,0.010,0.001,0] # mean value of lengths for d = 2.5027632403871487e-05
+  #lengths = [0.000,0.001,0.003,0.012,0.032,0.067,0.113,0.155,0.175,0.163,0.127,0.081,0.043,0.019,0.007,0.002,0.000,0.000,0.000,0.000] # infimum value of lengths for d = 1.0620646970966825e-09
+  lengths = [0.000,0.000,0.002,0.006,0.019,0.043,0.081,0.124,0.158,0.168,0.151,0.114,0.072,0.038,0.017,0.006,0.002,0.000,0.000,0.000] # lowerbound value of lengths for d = 1.8626451493176932e-10
+
+  #k = (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+  #lengths = [9, 85, 443, 1193, 2192, 2641, 2112, 1048, 258, 27, 3] # sampled lattices for multi=3
+
+
+  plt.figure(figsize=(8,5))
+
+  plt.bar(k, lengths, width=0.85, color="#1f77b4", edgecolor="white")
+
+  plt.title(r"Lower bound value ($d = 1.86\cdot 10^{-10}$)", fontsize=16)
+  plt.xlabel("Number of reduction steps $k$", fontsize=14)
+  plt.ylabel(r"Number of Lattices", fontsize=14)
+  plt.xticks(k)
+  plt.grid(axis='y', alpha=0.3)
+  plt.tight_layout()
+  #plt.savefig("histogram_reduction_steps_meanvalue.png", dpi=300)
+  plt.show()
+
+def plot_skew_vs_minimal_basis():
+
+  b1 = np.array([3,0])
+  b2 = np.array([1,3])
+
+  pts = []
+  for m in range(0,6):
+    for n in range(0,6):
+        pts.append(m*b1+n*b2)
+
+  fig, ax = plt.subplots(figsize=(4,4))
+  pts = np.array(pts)
+
+  ax.scatter(pts[:,0], pts[:,1], color='black', s=10)
+  b1 = np.array([3,0])
+  b2 = np.array([10,3])
+  ax.arrow(0, 0, b1[0], b1[1],color='black',width=0.03,head_width=0.25,head_length=0.35,length_includes_head=True)
+  ax.arrow(0, 0, b2[0], b2[1],color='black',width=0.03,head_width=0.25,head_length=0.35,length_includes_head=True)
+  ax.set_aspect('equal')
+
+  ax.axis('off')
+  plt.show()
 
 
 if __name__ == "__main__":
@@ -361,10 +537,20 @@ if __name__ == "__main__":
 
   d = 0.00714 #2857142857143
   #print( line_intervals_domains(d))
-  plot_line_domains(d, plot_domains=True)
+  #plot_line_domains(0.04, plot_domains=True)
   #histogram_for_k(d)
-  
-    
+
+  #d=0
+  #d = 1e-9
+  d = 2.5027632403871487e-05 #mean
+  #d = 1.0620646970966825e-09 #lower bound
+  #d = 1.8626451493176932e-10 #proved lower bound
+
+  #plot_all_disk_intersecting_line(d=1.0620646970966825e-09, plot=False)
+  #total_length_intersection(d)
+
+  #plot_histogram_for_thesis()
+  plot_skew_vs_minimal_basis()
 
 
 

@@ -24,7 +24,7 @@ def w_k(k,m=64,M=1000):
   c = constant_c(m)
   print(f"lambda_dom: {lambda_dom},\nmu: {mu},\nc: {c}")
   print(f"symbolic w_{k}: {c*lambda_dom**k} + {c*lambda_dom**k * (abs(mu)/abs(lambda_dom))**k} * CONST")
-  return c * lambda_dom ** k * (1 + (abs(mu)/abs(lambda_dom))**k)
+  return c * lambda_dom ** k , (1 + (abs(mu)/abs(lambda_dom))**k)
 
 def find_k_for_eps(epsilon, m=64, M=1000):
   lambda_dom = 0.199456936618669145744216645005185152214178590575950745618862326297299505461605521321064234246552894856623201238356834575285212183630482315506366412927878972060137032746047371063233 #p(m)
@@ -41,10 +41,10 @@ def find_k_for_eps(epsilon, m=64, M=1000):
 if __name__ == "__main__":
   #print(f"w_1: {w_1().n(precision)}")
   #print(f"w_2: {w_2().n(precision)}")
-  k = 3
+  k = 1
   M=1000
-  w_k_val = w_k(k, m=8, M=M)
-  print(f"w_{k}: {w_k_val.n(precision)}")
+  w_k_val,err = w_k(k, m=16, M=M)
+  print(f"w_{k}: {w_k_val.n(precision)} + {err.n(precision)} * CONST")
   #print(f"paper w_{k}: {w_2_val}")
 
   epsilon = 0.0001

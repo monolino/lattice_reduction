@@ -192,9 +192,9 @@ def Constant_C_4(m, grid_res=300, plot=False):
   return real_part(C_4)
 
 if __name__ == "__main__":
-  m = 32
-  #c = constant_c(m)
-  #print(f"Constant c for m={m}: {c}")
+  m = 64
+  c = constant_c(m)
+  print(f"Constant c for m={m}: {c}")
 
   e0 = vector([1] + [0]*(m-1)) #constant 1 is (1,0,...,0) in the basis (x-a)^i
   m = 64
@@ -202,7 +202,7 @@ if __name__ == "__main__":
   #print('f[1] = ', eigenvector_f(0.2 + 0j, m))
 
   
-  print('Constant C_4 = ', Constant_C_4(m=m, grid_res=400, plot=False))
+  #print('Constant C_4 = ', Constant_C_4(m=m, grid_res=400, plot=False))
 
   #print(f"eigenvectors for m={m}: ", compute_eigenvectors(m, plot=True))
   

@@ -19,17 +19,24 @@ def get_samples(filename):
 #========================= PDF function and F(w,/overline{w}) = pdf(w) =========================#
 
 def pdf(z):
-  # d=0
-  #d = 1e-9
+  #d=0
+  d = 1e-9
   #d = 2.5027632403871487e-05 #mean
-  d = 1.0620646970966825e-09 #lower bound
+  #d = 1.0620646970966825e-09 #lower bound
+  #d = 1.8626451493176932e-10 #proved lower bound
   #z is a complex number
   return np.exp(- (z.imag - d) ** 2 / ( 2* 0.05 ** 2)) #sigma=0.05
 
 def F(u,v):
-  return  np.exp(-((v-u)/(2 * 1j))**2 * (1/(2*0.05**2))) #sigma=0.05
+  #d=0
+  #d = 1e-9
+  #d = 2.5027632403871487e-05 #mean
+  #d = 1.0620646970966825e-09 #lower bound
+  d = 1.8626451493176932e-10 #proved lower bound
+  #v,u are complex numbers 
+  return  np.exp(-((v-u)/(2 * 1j) + d)**2 * (1/(2*0.05**2))) #sigma=0.05
 
-def normalization_constant_N(pdf,m, samples=100, plot=False):
+def normalization_constant_N(pdf, samples=100, plot=False):
   #vector with basis (x-1/2)^i
   #compute the coefficients by numerical integration
   
@@ -189,7 +196,7 @@ def spectral_gap(m):
   print(f"m={m}: lambda_4 = {lam_4}, lambda_6 = {lam_6}, mu_4 = {mu_4}")
   return 1/lam_4 * max(lam_6, mu_4)
 
-def norm_F(m, F, sample_points,samples=200):
+def norm_F_KDE(m, F, sample_points,samples=200):
   x = np.linspace(0, 1, samples)
   y = np.linspace(-0.5, 0.5, samples)
   X, Y = np.meshgrid(x, y)
@@ -220,9 +227,47 @@ def norm_F(m, F, sample_points,samples=200):
   print(f"||F|| = {max_val}")
   return max_val
 
+def Norm_F(F, pdf, samples=1000):
+
+  #d=0
+  #d = 2.5027632403871487e-05 #mean
+  #d = 1.0620646970966825e-09 #lower bound
+  d = 1e-9
+  #d = 1.8626451493176932e-10 #proved lower bound
+
+  N = normalization_constant_N(pdf)
+  if True:
+    return N* np.exp(25**2/2 - 100*d**2) #sigma=0.05
+
+
+
+
+  x = np.linspace(0, 1, samples)
+  y = np.linspace(-0.5, 0.5, samples)
+  X, Y = np.meshgrid(x, y)
+  a = np.linspace(0, 1, samples)
+  b = np.linspace(-0.5, 0.5, samples)
+  A, B = np.meshgrid(a, b)
+
+  mask_U = (X - 0.5)**2 + Y**2 <= 0.25
+  U = X + 1j*Y
+  mask_V = (A - 0.5)**2 + B**2 <= 0.25
+  V = A + 1j*B
+
+  u_points = U[mask_U]
+  v_points = V[mask_V]
+
+  N = normalization_constant_N(pdf)
+  max_Val  = 0.0
+  for u in u_points:
+    vals = np.abs(N * F(u, v_points))
+    max_Val = max(max_Val, np.max(vals))
+
+  return max_Val
+
 def probability_estimate(k, m, pdf, grid_res=100, C_4=None, plot=False):
   lam = 0.1994588183437672601918456859798790
-  N = normalization_constant_N(pdf, m, samples=grid_res, plot=plot)
+  N = normalization_constant_N(pdf, samples=grid_res, plot=plot)
   f =  vector(CC, [N] + [0]*(m-1)) #F(u,u) = f(u) = N * e^0 = N where N is normalization constant of the pdf
   dual_f_p = dual_f_star(f, m)
   if C_4 is None:
@@ -245,13 +290,24 @@ def f_dual_of_pdf(m, pdf):
   #d = 1e-9
   #d = 2.5027632403871487e-05 #mean
   #d = 1.0620646970966825e-09 #lower bound
-  N = normalization_constant_N(pdf, m)
+  N = normalization_constant_N(pdf)
   normalized_pdf = lambda z: N * pdf(z)
   pdf_vector = f_to_vector_any_function(normalized_pdf, m)
   f_dual = dual_f_star(pdf_vector, m)
   return f_dual
 
-
+def prob(values):
+  k = values[0]
+  lam = values[1]
+  f_star = values[2]
+  C_4 = values[3]
+  F_norm = values[4]
+  nu = values[5]
+  
+  prob = lam**k * f_star * C_4
+  error = prob * F_norm * nu ** k
+  print(f"P[L >= {k} + 1] = {prob} * (1 + O({F_norm * nu ** k}))\nwith error = {error}")
+  return prob, error
 
 if __name__ == "__main__":
   #k = 30
@@ -278,4 +334,9 @@ if __name__ == "__main__":
   #print(f"P[L >= {k} + 1] = {prob} * (1 + O({normF * gap}))")
   #print(f"error = {prob * normF * gap}")
 
-  print(f_dual_of_pdf(m, pdf))
+  #print(f_dual_of_pdf(m, pdf))
+
+  print(f"Norm F = {Norm_F(F, pdf, samples=200)}")
+  k = 352
+  values = [k, 0.1994588183437672601918456859798790, 5.18, 0.31291933806424, 4.20536147418601e136, 0.4100105609983632]
+  prob(values)

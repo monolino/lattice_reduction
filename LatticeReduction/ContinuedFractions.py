@@ -215,6 +215,9 @@ def get_smallest_y_value(filename):
 #d = 2.5027632403871487e-05 #mean
 d = 1.0620646970966825e-09 #lower bound
 
+
+print(Total_Length_Lineintersection(d))
+
 #for r in sortedresult:
   #print(r["word"], r["radius"])
 
@@ -232,7 +235,7 @@ radius = 0.25 #m=1
 #print(Total_Length_Lineintersection(d))
 
 #make_histogram_from_file("Total_Length_Lineintersection_d_1e-09.txt")
-make_histogram_from_file("Total_Length_Lineintersection_d_2.5027632403871487e-05.txt")
+#make_histogram_from_file("Total_Length_Lineintersection_d_2.5027632403871487e-05.txt")
 
 #print(get_mean_y_value("QtPegasis/points_-21474836479_samples_10000_multi_3.txt"))
 #print(get_smallest_y_value("QtPegasis/points_-21474836479_samples_10000_multi_3.txt"))
