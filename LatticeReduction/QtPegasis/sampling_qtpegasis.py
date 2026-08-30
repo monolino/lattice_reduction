@@ -3,6 +3,7 @@ import random as pyrandom #Sage also has a random
 from L_rdc_qtpegasis import *
 import matplotlib.pyplot as plt
 import numpy as np
+import ast
 
 #how to hash into class groups Construction 2 p.11 of https://eprint.iacr.org/2024/034.pdf
 
@@ -349,6 +350,86 @@ def plot_z_in_disk(D, num_samples=1000, multi=1, log=False):
 
   plt.show()
 
+
+def plot_log_imaginary_part(filename):
+  points = []
+
+  with open(filename, "r") as f:
+    for line in f:
+      line = line.strip()
+      if line:
+        points.append(ast.literal_eval(line))
+
+  x , y = zip(*points)
+
+  plt.scatter(x, y, s=2)
+  plt.yscale("log")
+  plt.ylabel(r"$\Im(z)$")
+  plt.title(f"Logarithm plot of the imaginary part of z")
+  plt.xlabel(r"$\Re(z)$")
+  plt.tight_layout()
+  plt.show()
+
+
+def plot_points_in_disk_from_file(filename):
+
+  points = []
+
+  with open(filename, "r") as f:
+    for line in f:
+      line = line.strip()
+      if line:
+        points.append(ast.literal_eval(line))
+
+  x, y = zip(*points)
+
+  plt.figure(figsize=(6,6))
+  plt.scatter(x, y, s=3, alpha=1, color='black')
+
+  # draw the circle (x-1/2)^2 + y^2 = (1/2)^2
+  theta = np.linspace(0, 2*np.pi, 300)
+  circle_x = 0.5 + 0.5 * np.cos(theta)
+  circle_y = 0.5 * np.sin(theta)
+
+  plt.plot(circle_x, circle_y, 'r', label='Re(1/z) = 1')
+
+  plt.xlim(0, 1)
+  plt.ylim(-0.5, 0.5)
+
+  plt.gca().set_aspect('equal')
+
+  plt.title(f"Points z in the complex plane")
+  plt.xlabel("Re(z)")
+  plt.ylabel("Im(z)")
+  plt.legend()
+
+  plt.savefig(f"Disk_points_from_{filename}.png")
+  
+  plt.show()
+
+
+  
+def plot_primes(D, num_samples=1000, multi=1):
+  primes = []
+  for _ in range(num_samples):
+    class_group_element = random_class_group_element(D, multi=multi)
+    p, b = class_group_element
+    primes.append(p)
+  
+  bound = np.sqrt((abs(D)/4)**multi)
+
+  print("min(p) =", min(primes))
+  print("max(p) =", max(primes))
+  print("X =", bound)
+  plt.figure(figsize=(8,4))
+  plt.scatter(range(len(primes)), primes, s=5)
+  plt.axhline(bound, color="red", linestyle="--", label="X")
+  plt.xlabel("Sample number")
+  plt.ylabel("Prime $p$")
+  plt.legend()
+  plt.show()
+
+
 def multiple_histograms(D, num_samples, multi_list):
   plt.figure()
   for multi in multi_list:
@@ -405,8 +486,12 @@ if __name__ == "__main__":
 
   multi = 3
   #histogram = histogram_of_lattice_reduction(-D, 10000, log=True, multi=multi)
-  plot_z_in_disk(-D, num_samples=10000, log=True, multi=multi)
+  #plot_z_in_disk(-D, num_samples=10000, log=True, multi=multi)
   #multiple_histograms(-D, num_samples=1000, multi_list=[10, 11, 12, 13])
+
+  #plot_log_imaginary_part(f"points_{-D}_samples_{10000}_multi_{multi}.txt")
+  #plot_points_in_disk_from_file(f"points_{-D}_samples_{10000}_multi_{multi}.txt")
+  plot_primes(-D, num_samples=10000, multi=multi)
 
   if False:
     p,b = class_group_element
