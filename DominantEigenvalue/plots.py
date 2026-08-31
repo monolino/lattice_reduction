@@ -1,5 +1,8 @@
 from sage.all import *
-from hurwitzZeta import *
+from .DominantEigenvalue import *
+import matplotlib.pyplot as plt
+import numpy as np
+print("Imported p:", "p" in globals())
 
 def plot_lambdas(s,M):
   lambdas = []
@@ -64,12 +67,51 @@ def plot_Gf_f(s,M,m):
   def G_eval_div_f_numeric_m(t):
     return G_eval(eig_function, s, M, t)/eig_function(t)
   
+  x = np.linspace(0, 1, 200)
+  y = []
+
+  for t in x:
+    val = real_part(G_div_f_numeric(eig_function, s, M, t))
+    y.append(float(val))
+
+  lambda_m = 0.199458818343767
+
+  fig, ax = plt.subplots(figsize=(8, 6))
+
+  ax.plot(x, y, color="blue", label=r"$G[f](t)/f(t)$")
+  '''
+  ax.axhline(
+    lambda_m,
+    color="red",
+    linestyle="--",
+    linewidth=2,
+    label=r"$\lambda_m$"
+  )
+  '''
+
+  ax.set_xlabel(r"$t$", fontsize=14)
+  ax.set_ylabel(r"$\frac{G[p_m](t)}{p_m(t)}$", fontsize=16)
+
+  ax.set_title(
+    rf"$\frac{{G[p_m](t)}}{{p_m(t)}}$ for $m={m}$",
+    fontsize=18
+  )
+
+  #ax.legend()
+  fig.tight_layout()
+
+  plt.savefig(f"G_plot_own_m{m}.pdf", bbox_inches="tight")
+  plt.show()
+  print("Saved plot")
+
+  '''
   plt = plot(
     plot_function,
     (0, 1),
+    figsize=[8,6],
     plot_points=200,
-    axes_labels=[r"$t$", r"$G[f](t)/f(t)$"],
-    title=r"$G[f](t)/f(t)$ for m = " + str(m) + ", M = " + str(M) 
+    axes_labels=[r"$t$", rf"$\frac{{G[f](t)}}{{f(t)}}$"]#,
+    #title= rf"$\frac{{G[f](t)}}{{f(t)}}$ for $m={m}$"
   )
   plt2 = plot(
     lambda t: 0.199458818343767,
@@ -80,9 +122,13 @@ def plot_Gf_f(s,M,m):
     legend_label=r"$\lambda_m$",
     plot_points=3
   )
-  plt = plt + plt2
+  plt = plt# + plt2
+  plt.tight_layout()
+  plt.title(rf"$\frac{{G[f](t)}}{{f(t)}}$ for $m={m}$")
   plt.save(f"G_plot_own_m{m}.png")
+  plt.show()
   print("Saved plot")
+  '''
 
 def plot_eigenfunction_m(m):
   eig_function = lambda x: real_part(p(m)(x))
@@ -100,8 +146,8 @@ def plot_eigenfunction_m(m):
 if __name__ == "__main__" :
   #plot_lambdas(4,1000)
   #plot_eigenfunctions
-  m = 32
-  plot_Gf_f(4,10000,m)
+  m = 8
+  plot_Gf_f(4,100,m)
   #plot_eigenfunction_m(m)
 
   '''

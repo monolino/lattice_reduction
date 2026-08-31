@@ -105,7 +105,7 @@ def p(m,s=4):
     base = Path(__file__).resolve().parent
     path = base / f"lambda_{precision}"
     path.write_text(str(real_part(lambda_dom)))
-    return real_part(lambda_dom)
+    #return real_part(lambda_dom)
     
     eigvec = dom[1][0]
     #normalize the eigenvector such that f(0) = 1

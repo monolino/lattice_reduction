@@ -2,6 +2,7 @@ from sage.all import *
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
+import re
 
 
 
@@ -477,7 +478,7 @@ def total_length_intersection(d):
     total_length[k] = length_k[k] - length_k.get(k+1, 0)
 
   for k in sorted(total_length):
-    print(f"k={k}: length = {total_length[k]:.3f}")
+    print(f"k={k}: length = {total_length[k]}")
 
   return total_length
 
@@ -528,6 +529,30 @@ def plot_skew_vs_minimal_basis():
   ax.axis('off')
   plt.show()
 
+def plot_multiple_histograms_from_file(filenames, labels, title):
+  plt.figure(figsize=(8, 5))
+  colors = plt.cm.viridis(np.linspace(0, 1, len(filenames)))
+  for filename, label in zip(filenames, labels):
+    k= []
+    count = []
+    with open(filename, "r") as f:
+      for line in f:
+        m = re.match(r"L = (\d+): (\d+)", line)
+        if m:
+          k.append(int(m.group(1)))
+          count.append(int(m.group(2)))
+    plt.bar(k, count, color=colors[filenames.index(filename)], alpha=0.5, label=label, width=0.8)
+
+  plt.xlabel("Number of reduction steps $k$")
+  plt.ylabel("Frequency")
+  plt.title(title)
+  plt.legend()
+  plt.grid(alpha=0.3)
+  plt.tight_layout()
+  plt.show()
+
+
+
 
 if __name__ == "__main__":
   #plot_until_k(5)
@@ -542,15 +567,30 @@ if __name__ == "__main__":
 
   #d=0
   #d = 1e-9
-  d = 2.5027632403871487e-05 #mean
+  #d = 2.5027632403871487e-05 #mean
   #d = 1.0620646970966825e-09 #lower bound
-  #d = 1.8626451493176932e-10 #proved lower bound
+  d = 1.8626451493176932e-10 #proved lower bound
 
   #plot_all_disk_intersecting_line(d=1.0620646970966825e-09, plot=False)
   #total_length_intersection(d)
 
   #plot_histogram_for_thesis()
-  plot_skew_vs_minimal_basis()
+  #plot_skew_vs_minimal_basis()
+
+  filenames = [
+    "LatticeReduction/QtPegasis/histogram_5 * 2**32 - 1_10000_multi_10.txt",
+    "LatticeReduction/QtPegasis/histogram_5 * 2**32 - 1_10000_multi_11.txt",
+    "LatticeReduction/QtPegasis/histogram_5 * 2**32 - 1_10000_multi_12.txt",
+    "LatticeReduction/QtPegasis/histogram_5 * 2**32 - 1_10000_multi_13.txt"
+  ]
+  labels = [
+    "n = 10",
+    "n = 11",
+    "n = 12",
+    "n = 13"
+  ]
+  title = "Histogram of reduction steps for different n"
+  plot_multiple_histograms_from_file(filenames, labels, title)
 
 
 

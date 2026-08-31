@@ -1,6 +1,7 @@
 from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.colors as mcolors
 
 def apply_word(word, z):
   for m in reversed(word):
@@ -31,6 +32,16 @@ def interval(word):
   a, b = apply_word(word, 0), apply_word(word, 1)
   return min(a,b), max(a,b)
 
+
+def lighter_shade(color, factor):
+  """
+  factor = 0 -> original color
+  factor = 1 -> white 
+  """
+  rgb = np.array(mcolors.to_rgb(color))
+  white = np.array([1, 1, 1])
+  return rgb * (1 - factor) + white * factor
+
 def plot_disks():
   alpha = 1
   fig, ax = plt.subplots()
@@ -46,10 +57,18 @@ def plot_disks():
   x = center_x + radius * np.cos(theta)
   y = center_y + radius * np.sin(theta)
 
-  ax.fill(x, y, color="#FFF7AE", alpha=alpha, label=f"[]")
+  base_color_0 = "#FFF7AE"
+  base_color_1 = "#8BCF93"
+  base_color_2 = "#8FB3D9"
+  base_color_3 = "#B39AC7"
+
+  ax.fill(x, y, color=base_color_0, alpha=alpha, label=f"[]")
 
   #Disks [m]
   for m in range(1,7):
+    r_max = radius_of_word([1])[0]
+    r_min = radius_of_word([7])[0]
+
     radius, center = radius_of_word([m])
     theta = np.linspace(0, 2*np.pi, 300)
     center_x, center_y = center, 0
@@ -57,10 +76,14 @@ def plot_disks():
     x = center_x + radius * np.cos(theta)
     y = center_y + radius * np.sin(theta)
 
-    ax.fill(x, y, color="#B8E6B8", alpha=alpha, label=f"[{m}]")
+    factor = 0.8 * (1 - (radius - r_min)/(r_max - r_min))
+    color = lighter_shade(base_color_1, factor)
+    ax.fill(x, y, color=color, alpha=alpha, label=f"[{m}]")
 
   #Disks [1,m]
   for m in range(1,7):
+    r_max = radius_of_word([1,1])[0]
+    r_min = radius_of_word([1,7])[0]
     radius, center = radius_of_word([1,m])
     theta = np.linspace(0, 2*np.pi, 300)
     center_x, center_y = center, 0
@@ -68,11 +91,15 @@ def plot_disks():
     x = center_x + radius * np.cos(theta)
     y = center_y + radius * np.sin(theta)
 
-    ax.fill(x, y, color="#BFD7FF", alpha=alpha, label=f"[1,{m}]")\
+    factor = 0.8 * (1 - (radius - r_min)/(r_max - r_min))
+    color = lighter_shade(base_color_2, factor)
+    ax.fill(x, y, color=color, alpha=alpha, label=f"[1,{m}]")\
 
   
   #Disks [2,m]
   for m in range(1,7):
+    r_max = radius_of_word([2,1])[0]
+    r_min = radius_of_word([2,7])[0]
     radius, center = radius_of_word([2,m])
     theta = np.linspace(0, 2*np.pi, 300)
     center_x, center_y = center, 0
@@ -80,7 +107,9 @@ def plot_disks():
     x = center_x + radius * np.cos(theta)
     y = center_y + radius * np.sin(theta)
 
-    ax.fill(x, y, color="grey", alpha=alpha, label=f"[2,{m}]")
+    factor = 0.8 * (1 - (radius - r_min)/(r_max - r_min))
+    color = lighter_shade(base_color_3, factor)
+    ax.fill(x, y, color=color, alpha=alpha, label=f"[2,{m}]")
   
   ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
   ax.set_aspect('equal')
@@ -170,7 +199,7 @@ def make_histogram_from_file(filename):
   values = []
   with open(filename, "r") as f:
     for line in f:
-      x, y = line.split(":")
+      x, y = line.split(":") 
       k.append(int(x))
       values.append(float(y))
   plt.figure(figsize=(8, 4))
@@ -216,7 +245,7 @@ def get_smallest_y_value(filename):
 d = 1.0620646970966825e-09 #lower bound
 
 
-print(Total_Length_Lineintersection(d))
+#print(Total_Length_Lineintersection(d))
 
 #for r in sortedresult:
   #print(r["word"], r["radius"])
@@ -227,8 +256,8 @@ radius = 0.25 #m=1
   #radius = radius * (m-1)/(m+1)
   #print(radius)
 
-
-#plot_disks()
+print("hello")
+plot_disks()
 
 #print(max_value_in_specific_word([10000,1]))
 
