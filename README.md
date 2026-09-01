@@ -1,9 +1,11 @@
 ## Thesis
-This repository accompanies the master's thesis
+This repository accompanies my master's thesis
 
 "An Analysis of the Number of Reduction Steps for Special Two-Dimensional Lattices".
 
 # Abstract
+The following abstract is reproduced verbatim from the accompanying master's thesis *An Analysis of the Number of Reduction Steps for Special Two-Dimensional Lattices*.
+
 The Gaussian algorithm for lattice reduction in two dimensions is analyzed for special input lattices arising from ideals in imaginary quadratic fields. In particular, we examine the distribution of the number of reduction steps. For this, we examine the tail probability $\Pr[L\ge k+1]$, which quantifies the probability that the reduction algorithm requires more than $k$ reduction steps.
 
 
