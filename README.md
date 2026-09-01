@@ -1,6 +1,10 @@
 This is the code base for my master thesis "An Analysis of the Number of Reduction Steps for Special Two-Dimensional Lattices".
 
 # Abstract
+The Gaussian algorithm for lattice reduction in two dimensions is analyzed for special input lattices arising from ideals in imaginary quadratic fields. In particular, we examine the distribution of the number of reduction steps. For this, we examine the tail probability $\Pr[L\ge k+1]$, which quantifies the probability that the reduction algorithm requires more than $k$ reduction steps.
+
+
+We analyze the geometric properties of such lattices arising from ideals and construct a probabilistic model for their initial distribution in a fundamental domain. Based on the transfer operator framework introduced by  Daudé, Flajolet, and Vallée [[DFV96](https://inria.hal.science/inria-00073892/file/RR-2798.pdf)], we derive numerical estimates for the reduction step probability of these special lattices. We further introduce a geometric line-intersection model that exploits the geometric properties observed in the initial distribution of the lattices. A numerical comparison with experimental data shows that this method provides a more accurate prediction of the observed probabilities.
 
 # File Tree
 
