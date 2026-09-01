@@ -1,4 +1,7 @@
-This is the code base for my master thesis "An Analysis of the Number of Reduction Steps for Special Two-Dimensional Lattices".
+## Thesis
+This repository accompanies the master's thesis
+
+"An Analysis of the Number of Reduction Steps for Special Two-Dimensional Lattices".
 
 # Abstract
 The Gaussian algorithm for lattice reduction in two dimensions is analyzed for special input lattices arising from ideals in imaginary quadratic fields. In particular, we examine the distribution of the number of reduction steps. For this, we examine the tail probability $\Pr[L\ge k+1]$, which quantifies the probability that the reduction algorithm requires more than $k$ reduction steps.
@@ -154,7 +157,7 @@ is the KDE probability density function.
 samples a random ideal class group element of the quadratic field $\mathbb{Q}[\sqrt{D}]$.
 
 ```histogram_of_lattice_reduction(D, num_samples, log=False, multi=10):```
-applies the lattice reduction algorithm to the sampled lattices and counts the number of reducton steps. (Creates histogram out of it).
+applies the lattice reduction algorithm to the sampled lattices and counts the number of reduction steps. (Creates histogram out of it).
 
 ```plot_z_in_disk(D, num_samples=1000, multi=1, log=False): ```
 plots the complex representation $z$ of the sampled lattices in the fundamental disk $\mathcal{D}$.
@@ -172,7 +175,7 @@ uses the trace value to compute the upper bound on the subdominant eigenvalue $\
 
 **Qt-pegasis_prob.py**\
 ```normalization_constant_N(pdf, samples=100, plot=False):```
-computes the normalization factor $\frac{1}{Z_d}$, which ensures that the probability density function is actually a probablity denstiy function.
+computes the normalization factor $\frac{1}{Z_d}$, which ensures that the probability density function is actually a probability denstiy function.
 
 ```f_to_vector_any_function(function, m, samples=100,A=None, f_vals=None):```
 computes the coefficient vector of a function with respect to the basis $\{(x-1/2)^i\}$.
@@ -192,3 +195,11 @@ computes $f^*_4[\rho]$.
 ```prob(values):```
 computes both the leading term and the error term of the asymptotical probablity estimate.
 
+## Requirements
+The code was developed in SageMath and Python.
+
+Required packages include:
+- numpy
+- scipy
+- matplotlib
+- sage
