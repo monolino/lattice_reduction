@@ -173,7 +173,7 @@ computes the trace of the uniform transfer operator squared $\mathcal{G}_4^2$.
 ```subdominant_eigenvalue_upperbound(lam=get_lambda(), M=1000):```
 uses the trace value to compute the upper bound on the subdominant eigenvalue $\mu_4$.
 
-## probability
+## probability/
 
 **Qt-pegasis_prob.py**\
 ```normalization_constant_N(pdf, samples=100, plot=False):```
