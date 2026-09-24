@@ -370,6 +370,25 @@ def plot_log_imaginary_part(filename):
   plt.tight_layout()
   plt.show()
 
+def plot_log_real_part(filename):
+  points = []
+
+  with open(filename, "r") as f:
+    for line in f:
+      line = line.strip()
+      if line:
+        points.append(ast.literal_eval(line))
+
+  x , y = zip(*points)
+
+  plt.scatter(x, y, s=2)
+  plt.xscale("log")
+  plt.ylabel(r"$\Im(z)$")
+  plt.title(f"Logarithm plot of the real part of z")
+  plt.xlabel(r"$\Re(z)$")
+  plt.tight_layout()
+  plt.show()
+
 
 def plot_points_in_disk_from_file(filename):
 
@@ -490,8 +509,9 @@ if __name__ == "__main__":
   #multiple_histograms(-D, num_samples=1000, multi_list=[10, 11, 12, 13])
 
   #plot_log_imaginary_part(f"points_{-D}_samples_{10000}_multi_{multi}.txt")
+  plot_log_real_part(f"Log_and_plots/points_{-D}_samples_{10000}_multi_{multi}.txt")
   #plot_points_in_disk_from_file(f"points_{-D}_samples_{10000}_multi_{multi}.txt")
-  plot_primes(-D, num_samples=10000, multi=multi)
+  #plot_primes(-D, num_samples=10000, multi=multi)
 
   if False:
     p,b = class_group_element

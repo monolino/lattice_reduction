@@ -65,13 +65,14 @@ def plot_disks():
   ax.fill(x, y, color=base_color_0, alpha=alpha, label=f"[]")
 
   #Disks [m]
-  for m in range(1,7):
+  for m in range(1,12):
     r_max = radius_of_word([1])[0]
     r_min = radius_of_word([7])[0]
 
     radius, center = radius_of_word([m])
     theta = np.linspace(0, 2*np.pi, 300)
     center_x, center_y = center, 0
+    print(f"[{m}] radius: {radius}, center: {center}")
     
     x = center_x + radius * np.cos(theta)
     y = center_y + radius * np.sin(theta)
@@ -81,13 +82,13 @@ def plot_disks():
     ax.fill(x, y, color=color, alpha=alpha, label=f"[{m}]")
 
   #Disks [1,m]
-  for m in range(1,7):
+  for m in range(1,12):
     r_max = radius_of_word([1,1])[0]
     r_min = radius_of_word([1,7])[0]
     radius, center = radius_of_word([1,m])
     theta = np.linspace(0, 2*np.pi, 300)
     center_x, center_y = center, 0
-    
+    print(f"[1,{m}] radius: {radius}, center: {center}")
     x = center_x + radius * np.cos(theta)
     y = center_y + radius * np.sin(theta)
 

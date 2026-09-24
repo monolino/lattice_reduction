@@ -486,8 +486,8 @@ def total_length_intersection(d):
 def plot_histogram_for_thesis():
   k = np.arange(20)
   #lengths = [0.008,0.045,0.125,0.215,0.248,0.198,0.109,0.041,0.010,0.001,0] # mean value of lengths for d = 2.5027632403871487e-05
-  #lengths = [0.000,0.001,0.003,0.012,0.032,0.067,0.113,0.155,0.175,0.163,0.127,0.081,0.043,0.019,0.007,0.002,0.000,0.000,0.000,0.000] # infimum value of lengths for d = 1.0620646970966825e-09
-  lengths = [0.000,0.000,0.002,0.006,0.019,0.043,0.081,0.124,0.158,0.168,0.151,0.114,0.072,0.038,0.017,0.006,0.002,0.000,0.000,0.000] # lowerbound value of lengths for d = 1.8626451493176932e-10
+  lengths = [0.000,0.001,0.003,0.012,0.032,0.067,0.113,0.155,0.175,0.163,0.127,0.081,0.043,0.019,0.007,0.002,0.000,0.000,0.000,0.000] # infimum value of lengths for d = 1.0620646970966825e-09
+  #lengths = [0.000,0.000,0.002,0.006,0.019,0.043,0.081,0.124,0.158,0.168,0.151,0.114,0.072,0.038,0.017,0.006,0.002,0.000,0.000,0.000] # lowerbound value of lengths for d = 1.8626451493176932e-10
 
   #k = (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
   #lengths = [9, 85, 443, 1193, 2192, 2641, 2112, 1048, 258, 27, 3] # sampled lattices for multi=3
@@ -497,10 +497,11 @@ def plot_histogram_for_thesis():
 
   plt.bar(k, lengths, width=0.85, color="#1f77b4", edgecolor="white")
 
-  plt.title(r"Lower bound value ($d = 1.86\cdot 10^{-10}$)", fontsize=16)
+  plt.title(r"Minimum value ($d = 1.06\cdot 10^{-9}$)", fontsize=16)
   plt.xlabel("Number of reduction steps $k$", fontsize=14)
   plt.ylabel(r"Number of Lattices", fontsize=14)
   plt.xticks(k)
+  plt.ylim(0, 0.25)
   plt.grid(axis='y', alpha=0.3)
   plt.tight_layout()
   #plt.savefig("histogram_reduction_steps_meanvalue.png", dpi=300)
@@ -522,11 +523,12 @@ def plot_skew_vs_minimal_basis():
   ax.scatter(pts[:,0], pts[:,1], color='black', s=10)
   b1 = np.array([3,0])
   b2 = np.array([10,3])
-  ax.arrow(0, 0, b1[0], b1[1],color='black',width=0.03,head_width=0.25,head_length=0.35,length_includes_head=True)
-  ax.arrow(0, 0, b2[0], b2[1],color='black',width=0.03,head_width=0.25,head_length=0.35,length_includes_head=True)
+  #ax.arrow(0, 0, b1[0], b1[1],color='black',width=0.03,head_width=0.25,head_length=0.35,length_includes_head=True)
+  #ax.arrow(0, 0, b2[0], b2[1],color='black',width=0.03,head_width=0.25,head_length=0.35,length_includes_head=True)
   ax.set_aspect('equal')
 
   ax.axis('off')
+  plt.savefig("GitterPoints_axis.png", dpi=1200, bbox_inches="tight")
   plt.show()
 
 def plot_multiple_histograms_from_file(filenames, labels, title):
@@ -574,7 +576,7 @@ if __name__ == "__main__":
   #plot_all_disk_intersecting_line(d=1.0620646970966825e-09, plot=False)
   #total_length_intersection(d)
 
-  #plot_histogram_for_thesis()
+  plot_histogram_for_thesis()
   #plot_skew_vs_minimal_basis()
 
   filenames = [
@@ -590,7 +592,7 @@ if __name__ == "__main__":
     "n = 13"
   ]
   title = "Histogram of reduction steps for different n"
-  plot_multiple_histograms_from_file(filenames, labels, title)
+  #plot_multiple_histograms_from_file(filenames, labels, title)
 
 
 
